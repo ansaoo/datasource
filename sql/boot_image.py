@@ -49,15 +49,14 @@ def load_jpg_to_es(filename):
                 temp['eventDate'] = event_date.strftime('%Y-%m-%dT%H:%M:%S')
             else:
                 temp[to_camel_case(key)] = value
-    print(temp)
+    # print(temp)
     es.create(
         index='image',
         doc_type='_doc',
         id=hashlib.md5('{0}{1}'.format('jpeg', os.path.basename(filename)).encode('utf-8')).hexdigest(),
         body=temp
     )
-    with open('log', 'a') as fi:
-        fi.write('{0}: "{1}"\n'.format(filename, temp))
+    return temp
 
 
 def resize(filename, target='/home/ansaoo'):
@@ -69,9 +68,7 @@ def resize(filename, target='/home/ansaoo'):
         stdout=subprocess.PIPE,
         shell=True)
     (out, err) = proc.communicate()
-    with open('log', 'a') as fi:
-        fi.write('{0}: "{1}"\n'.format(filename, err))
-    print('{0}: {1}'.format(filename, err))
+    return err
 
 
 def to_camel_case(word):
@@ -88,13 +85,17 @@ if __name__ == "__main__":
     es = Elasticsearch()
     files = os.popen('find /home/ansaoo/Images/20* -iname "*.jpg"').readlines()
     tot = len(files)
+    f = open('log', 'a')
     for index, file in enumerate(files):
-        print('{0}/{1}'.format(index, tot))
+        print('{0}/{1}'.format(index, tot), end='\r')
         try:
-            resize(file.strip(), target='/home/ansaoo/Images/thumbnail')
-            load_jpg_to_es(file.strip())
+            first = resize(file.strip(), target='/home/ansaoo/Images/thumbnail')
+            second = load_jpg_to_es(file.strip())
+            f.write('{0}:\n')
+            f.write('  resize: {0}\n'.format(first))
+            f.write('  es: {0}\n'.format(second))
         except Exception as e:
             with open('error_log', 'a') as f:
-                f.write('{0}: "{1}"\n'.format(file, e.__str__()))
+                f.write('{0}: "{1}"\n'.format(file.strip(), e.__str__()))
     # resize(sys.argv[1], target='/home/ansaoo/Images/thumbnail')
     # load_jpg_to_es(sys.argv[1])
