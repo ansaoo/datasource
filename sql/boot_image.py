@@ -7,7 +7,7 @@ from kafka import KafkaProducer
 from elasticsearch import Elasticsearch
 import datetime
 from urllib.parse import urlencode
-import piexif
+#import piexif
 import os
 import sys
 import yaml
@@ -56,6 +56,8 @@ def load_jpg_to_es(filename):
         id=hashlib.md5('{0}{1}'.format('jpeg', os.path.basename(filename)).encode('utf-8')).hexdigest(),
         body=temp
     )
+    with open('log', 'a') as fi:
+        fi.write('{0}: "{1}"\n'.format(filename, temp))
 
 
 def resize(filename, target='/home/ansaoo'):
@@ -67,6 +69,8 @@ def resize(filename, target='/home/ansaoo'):
         stdout=subprocess.PIPE,
         shell=True)
     (out, err) = proc.communicate()
+    with open('log', 'a') as fi:
+        fi.write('{0}: "{1}"\n'.format(filename, err))
     print('{0}: {1}'.format(filename, err))
 
 
@@ -82,11 +86,15 @@ def to_camel_case(word):
 
 if __name__ == "__main__":
     es = Elasticsearch()
-    files = os.popen('find /home/ansaoo/Images/20* -iname "2018-*.jpg"').readlines()
+    files = os.popen('find /home/ansaoo/Images/20* -iname "*.jpg"').readlines()
     tot = len(files)
     for index, file in enumerate(files):
-        print('{0} / {1}'.format(index, tot))
-        resize(file.strip(), target='/home/ansaoo/Images/thumbnail')
-        load_jpg_to_es(file.strip())
+        print('{0}/{1}'.format(index, tot))
+        try:
+            resize(file.strip(), target='/home/ansaoo/Images/thumbnail')
+            load_jpg_to_es(file.strip())
+        except Exception as e:
+            with open('error_log', 'a') as f:
+                f.write('{0}: "{1}"\n'.format(file, e.__str__()))
     # resize(sys.argv[1], target='/home/ansaoo/Images/thumbnail')
     # load_jpg_to_es(sys.argv[1])
