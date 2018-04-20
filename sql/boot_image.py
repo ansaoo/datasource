@@ -1,3 +1,4 @@
+#!/home/samuel/venv3.5/bin/python3
 import hashlib
 import sqlite3
 import requests
@@ -8,6 +9,7 @@ import datetime
 from urllib.parse import urlencode
 import piexif
 import os
+import sys
 import yaml
 import subprocess
 
@@ -24,7 +26,7 @@ def get_position(address):
         return None
 
 
-def load_jpg_to_es(_id, filename):
+def load_jpg_to_es(filename):
     proc = subprocess.Popen(["exiv2 {0}".format(filename)], stdout=subprocess.PIPE, shell=True)
     (out, err) = proc.communicate()
     out = out.decode('utf-8').split('\n')
@@ -51,7 +53,7 @@ def load_jpg_to_es(_id, filename):
     es.create(
         index='image',
         doc_type='_doc',
-        id=hashlib.md5('{0}{1}'.format('jpeg', _id).encode('utf-8')).hexdigest(),
+        id=hashlib.md5('{0}{1}'.format('jpeg', os.path.basename(filename)).encode('utf-8')).hexdigest(),
         body=temp
     )
 
@@ -80,7 +82,9 @@ def to_camel_case(word):
 
 if __name__ == "__main__":
     es = Elasticsearch()
-    files = os.popen('find /home/ansaoo/Images/ -iname "2018-*.jpg"').readlines()
-    for _id, file in enumerate(files):
-        resize(file.strip(), target='/home/ansaoo/Projects/mediacenter/public/img')
-        load_jpg_to_es(_id+1, file.strip())
+    # files = os.popen('find /home/ansaoo/Images/ -iname "2018-*.jpg"').readlines()
+    # for file in files:
+    #     resize(file.strip(), target='/home/ansaoo/thumbnail')
+    #     load_jpg_to_es(file.strip())
+    resize(sys.argv[1], target='/home/ansaoo/thumbnail')
+    load_jpg_to_es(sys.argv[1])
