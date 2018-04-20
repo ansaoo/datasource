@@ -83,7 +83,9 @@ def to_camel_case(word):
 if __name__ == "__main__":
     es = Elasticsearch()
     files = os.popen('find /home/ansaoo/Images/20* -iname "2018-*.jpg"').readlines()
-    for file in files:
+    tot = len(files)
+    for index, file in enumerate(files):
+        print('{0} / {1}'.format(index, tot))
         resize(file.strip(), target='/home/ansaoo/Images/thumbnail')
         load_jpg_to_es(file.strip())
     # resize(sys.argv[1], target='/home/ansaoo/Images/thumbnail')
