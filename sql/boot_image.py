@@ -82,9 +82,9 @@ def to_camel_case(word):
 
 if __name__ == "__main__":
     es = Elasticsearch()
-    # files = os.popen('find /home/ansaoo/Images/ -iname "2018-*.jpg"').readlines()
-    # for file in files:
-    #     resize(file.strip(), target='/home/ansaoo/thumbnail')
-    #     load_jpg_to_es(file.strip())
-    resize(sys.argv[1], target='/home/ansaoo/thumbnail')
-    load_jpg_to_es(sys.argv[1])
+    files = os.popen('find /home/ansaoo/Images/20* -iname "2018-*.jpg"').readlines()
+    for file in files:
+        resize(file.strip(), target='/home/ansaoo/Images/thumbnail')
+        load_jpg_to_es(file.strip())
+    # resize(sys.argv[1], target='/home/ansaoo/Images/thumbnail')
+    # load_jpg_to_es(sys.argv[1])
