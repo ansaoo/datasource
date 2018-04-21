@@ -85,13 +85,14 @@ if __name__ == "__main__":
     es = Elasticsearch()
     files = os.popen('find /home/ansaoo/Images/20* -iname "*.jpg"').readlines()
     tot = len(files)
-    f = open('log', 'a')
+    f = open('{0}.log'.format(datetime.datetime.now().strftime('%Y-%m-%dT%H-%M-%S')), 'a')
+    print('0/{0}'.format(tot))
     for index, file in enumerate(files):
-        print('{0}/{1}'.format(index, tot), end='\r')
+        print('{0}/{1}'.format(index+1, tot))
         try:
             first = resize(file.strip(), target='/home/ansaoo/Images/thumbnail')
             second = load_jpg_to_es(file.strip())
-            f.write('{0}:\n')
+            f.write('{0}:\n'.format(file.strip()))
             f.write('  resize: {0}\n'.format(first))
             f.write('  es: {0}\n'.format(second))
         except Exception as e:
