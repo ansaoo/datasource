@@ -12,8 +12,33 @@ import os
 import sys
 import yaml
 import subprocess
+import argparse
 
 API_URL = "https://maps.googleapis.com/maps/api/geocode/json"
+
+
+def bulk(cmd, target, **kwargs):
+    files = os.popen(cmd).readlines()
+    tot = len(files)
+    f = open('{0}.log'.format(datetime.datetime.now().strftime('%Y-%m-%dT%H-%M-%S')), 'a')
+    print('0/{0}'.format(tot))
+    err_count = 0
+    for index, file in enumerate(files):
+        sys.stdout.flush()
+        print('{0}/{1}'.format(index+1, tot), end='\r')
+        try:
+            first = resize(file.strip(), target=target)
+            second = load_jpg_to_es(file.strip())
+            f.write('{0}:\n'.format(hashlib.md5(file.strip().encode('utf-8')).hexdigest()))
+            f.write('  filename: {0}\n'.format(file.strip()))
+            f.write('  resize: {0}\n'.format(first))
+            f.write('  es: {0}\n'.format(second))
+        except Exception as e:
+            err_count += 1
+            f.write('{0}:\n'.format(hashlib.md5(file.strip().encode('utf-8')).hexdigest()))
+            f.write('  filename: {0}\n'.format(file.strip()))
+            f.write('  error: "{0}"\n'.format(e.__str__()))
+    print('nb error: ', err_count)
 
 
 def get_position(address):
@@ -59,6 +84,15 @@ def load_jpg_to_es(filename):
     return temp
 
 
+def oneshot(file, target, **kwargs):
+    try:
+        resize(file, target=target)
+        load_jpg_to_es(file)
+        print('success')
+    except Exception:
+        raise Exception('Error: already exist')
+
+
 def resize(filename, target='/home/ansaoo'):
     base = os.path.basename(filename)
     if not os.path.exists('{0}/{1}'.format(target, base[:7])):
@@ -82,21 +116,38 @@ def to_camel_case(word):
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--mode',
+                        # nargs=1,
+                        default='oneshot',
+                        type=str,
+                        help='mode [oneshot|bulk]. Default=oneshot')
+    parser.add_argument('--type',
+                        # nargs=1,
+                        default='image',
+                        type=str,
+                        help='mode [image|audio|video]. Default=image')
+    parser.add_argument('--file',
+                        # nargs=1,
+                        default=None,
+                        type=str,
+                        help='default=None')
+    parser.add_argument('--target',
+                        # nargs=1,
+                        default='/home/ansaoo/Images/thumbnail',
+                        type=str,
+                        help='default=/home/ansaoo/Images/thumbnail')
+    parser.add_argument('--cmd',
+                        # nargs=1,
+                        default='find /home/ansaoo/Images/20* -iname "*.jpg"',
+                        type=str,
+                        help='default=\'find /home/ansaoo/Images/20* -iname "*.jpg"\'')
+    args = parser.parse_args()
     es = Elasticsearch()
-    files = os.popen('find /home/ansaoo/Images/20* -iname "*.jpg"').readlines()
-    tot = len(files)
-    f = open('{0}.log'.format(datetime.datetime.now().strftime('%Y-%m-%dT%H-%M-%S')), 'a')
-    print('0/{0}'.format(tot))
-    for index, file in enumerate(files):
-        print('{0}/{1}'.format(index+1, tot))
-        try:
-            first = resize(file.strip(), target='/home/ansaoo/Images/thumbnail')
-            second = load_jpg_to_es(file.strip())
-            f.write('{0}:\n'.format(file.strip()))
-            f.write('  resize: {0}\n'.format(first))
-            f.write('  es: {0}\n'.format(second))
-        except Exception as e:
-            with open('error_log', 'a') as f:
-                f.write('{0}: "{1}"\n'.format(file.strip(), e.__str__()))
-    # resize(sys.argv[1], target='/home/ansaoo/Images/thumbnail')
-    # load_jpg_to_es(sys.argv[1])
+
+    fct = {
+        'bulk': bulk,
+        'oneshot': oneshot
+    }
+
+    fct[args.mode](**vars(args))
