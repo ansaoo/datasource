@@ -132,7 +132,7 @@ def resize(filename, target='/home/ansaoo'):
     if not os.path.exists('{0}/{1}'.format(target, base[:7])):
         os.mkdir('{0}/{1}'.format(target, base[:7]))
     proc = subprocess.Popen(
-        ["convert -resize 600 {0} {1}/{2}/{3}_thumb.jpg".format(filename, target, base[:7], base)],
+        ["convert {0} -auto-orient  -resize 600 {1}/{2}/{3}_thumb.jpg".format(filename, target, base[:7], base)],
         stdout=subprocess.PIPE,
         shell=True)
     (out, err) = proc.communicate()
