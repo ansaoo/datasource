@@ -8,6 +8,7 @@ from elasticsearch import Elasticsearch
 import datetime
 from urllib.parse import urlencode
 #import piexif
+import re
 import os
 import sys
 import yaml
@@ -55,11 +56,14 @@ def load_jpg_to_es(filename):
     proc = subprocess.Popen(["exiv2 {0}".format(filename)], stdout=subprocess.PIPE, shell=True)
     (out, err) = proc.communicate()
     out = out.decode('utf-8').split('\n')
+    match = re.match('.*=(?P<tag>.*)\..*', os.path.basename(filename))
     temp = {
         'attr': 'jpeg',
         '@timestamp': str(datetime.datetime.now()).replace(' ', 'T'),
         'status': True
     }
+    if match:
+        temp['tag'] = [match.groupdict()['tag']]
     y = yaml.load('\n'.join([l for l in out[:-4] if l.count(': ') == 1]))
     for key, value in y.items():
         if value:
@@ -75,13 +79,43 @@ def load_jpg_to_es(filename):
             else:
                 temp[to_camel_case(key)] = value
     # print(temp)
-    es.create(
-        index='image',
-        doc_type='_doc',
-        id=hashlib.md5('{0}{1}'.format('jpeg', os.path.basename(filename)).encode('utf-8')).hexdigest(),
-        body=temp
-    )
+    try:
+        es.create(
+            index='image',
+            doc_type='_doc',
+            id=hashlib.md5('{0}{1}'.format('jpeg', os.path.basename(filename)).encode('utf-8')).hexdigest(),
+            body=temp
+        )
+    except Exception:
+        es.update(
+            index='image',
+            doc_type='_doc',
+            id=hashlib.md5('{0}{1}'.format('jpeg', os.path.basename(filename)).encode('utf-8')).hexdigest(),
+            body={'doc': temp}
+        )
     return temp
+
+
+def load_table_to_es(cursor, table, index=None):
+    cursor.execute('SELECT * FROM {0} limit 1'.format(table))
+    name = [d[0] for d in cursor.description]
+    data = [{k: v for k, v in zip(name, value) if v} for value in cursor.fetchall()]
+    print(data)
+    # try:
+    #     es.create(
+    #         index=table,
+    #         doc_type='_doc',
+    #         id=hashlib.md5('{0}{1}'.format(table, os.path.basename(filename)).encode('utf-8')).hexdigest(),
+    #         body=data
+    #     )
+    # except Exception:
+    #     es.update(
+    #         index=table,
+    #         doc_type='_doc',
+    #         id=hashlib.md5('{0}{1}'.format(table, os.path.basename(filename)).encode('utf-8')).hexdigest(),
+    #         body={'doc': data}
+    #     )
+    # return data
 
 
 def oneshot(file, target, **kwargs):
@@ -105,6 +139,17 @@ def resize(filename, target='/home/ansaoo'):
     return err
 
 
+def sql(db, table=None, **kwargs):
+    database = sqlite3.connect(db)
+    cursor = database.cursor()
+    if table:
+        load_table_to_es(cursor, table)
+    else:
+        cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
+        tables = [e[0] for e in cursor.fetchall()]
+        [load_table_to_es(cursor, t) for t in tables if t != 'sqlite_sequence']
+
+
 def to_camel_case(word):
     tmp = ''
     for index, token in enumerate(word.lower().split(' ')):
@@ -121,33 +166,49 @@ if __name__ == "__main__":
                         # nargs=1,
                         default='oneshot',
                         type=str,
-                        help='mode [oneshot|bulk]. Default=oneshot')
-    parser.add_argument('--type',
+                        required=True,
+                        choices=['oneshot', 'bulk', 'sql'],
+                        help='mode [oneshot|bulk|sql]. Default=oneshot')
+    parser.add_argument('--index',
                         # nargs=1,
                         default='image',
                         type=str,
-                        help='mode [image|audio|video]. Default=image')
+                        help='label index to use. Default=image')
     parser.add_argument('--file',
                         # nargs=1,
                         default=None,
                         type=str,
-                        help='default=None')
+                        help='file to load. Only use with mode=oneshot. Default=None')
     parser.add_argument('--target',
                         # nargs=1,
-                        default='/home/ansaoo/Images/thumbnail',
+                        default='~/Images/thumbnail',
                         type=str,
-                        help='default=/home/ansaoo/Images/thumbnail')
+                        help='loading img process create thumbnails.'
+                             ' This define repository to store thumbnails.'
+                             ' default=\'~/Images/thumbnail\'')
     parser.add_argument('--cmd',
                         # nargs=1,
-                        default='find /home/ansaoo/Images/20* -iname "*.jpg"',
+                        default='find ~/Images/20* -iname "*.jpg"',
                         type=str,
-                        help='default=\'find /home/ansaoo/Images/20* -iname "*.jpg"\'')
+                        help='command line to get multiple file to load. Only use with mode=bulk.'
+                             ' Default=\'find ~/Images/20* -iname "*.jpg"\'')
+    parser.add_argument('--db',
+                        # nargs=1,
+                        default=None,
+                        type=str,
+                        help='sqlite database to load (all table exist)')
+    parser.add_argument('--table',
+                        # nargs=1,
+                        default=None,
+                        type=str,
+                        help='sqlite specific table to load. Needs define db.')
     args = parser.parse_args()
     es = Elasticsearch()
 
     fct = {
         'bulk': bulk,
-        'oneshot': oneshot
+        'oneshot': oneshot,
+        'sql': sql
     }
 
     fct[args.mode](**vars(args))
