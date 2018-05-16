@@ -7,6 +7,7 @@ from kafka import KafkaProducer
 from elasticsearch import Elasticsearch
 import datetime
 from urllib.parse import urlencode
+from xmljson import badgerfish as bf
 #import piexif
 import re
 import os
@@ -14,8 +15,19 @@ import sys
 import yaml
 import subprocess
 import argparse
+import xml.etree.ElementTree as ET
+import collections
 
 API_URL = "https://maps.googleapis.com/maps/api/geocode/json"
+
+
+class Info:
+    def __init__(self, filename):
+        self.media_info = media_info(filename)
+
+
+class MediaInfoError(BaseException):
+    pass
 
 
 def bulk(cmd, target, **kwargs):
@@ -42,6 +54,28 @@ def bulk(cmd, target, **kwargs):
     print('nb error: ', err_count)
 
 
+def exiv2(filename):
+    proc = subprocess.Popen(["exiv2 {0}".format(filename)], stdout=subprocess.PIPE, shell=True)
+    (out, err) = proc.communicate()
+    if err:
+        return None
+    out = out.decode('utf-8').split('\n')
+    temp = {}
+    y = yaml.load('\n'.join([l for l in out[:-4] if l.count(': ') == 1]))
+    for key, value in y.items():
+        if value:
+            if key == 'File size':
+                value = float(int(value[:-6]))
+            if key == 'File name':
+                value = os.path.basename(value)
+            if key == 'Image timestamp':
+                event_date = datetime.datetime.strptime(value, '%Y:%m:%d %H:%M:%S')
+                temp['eventDate'] = event_date.strftime('%Y-%m-%dT%H:%M:%S')
+            else:
+                temp[to_camel_case(key)] = value
+    return temp
+
+
 def get_position(address):
     param = {'address': address}
     res = json.loads(requests.get("{}?{}".format(API_URL, urlencode(param))).text)
@@ -52,33 +86,33 @@ def get_position(address):
         return None
 
 
-def load_jpg_to_es(filename):
-    proc = subprocess.Popen(["exiv2 {0}".format(filename)], stdout=subprocess.PIPE, shell=True)
-    (out, err) = proc.communicate()
-    out = out.decode('utf-8').split('\n')
-    match = re.match('.*=(?P<tag>.*)\..*', os.path.basename(filename))
+def load_jpg_to_es(filename, data=None):
     temp = {
         'attr': 'jpeg',
         '@timestamp': str(datetime.datetime.now()).replace(' ', 'T'),
-        'status': True
+        'status': True,
+        'fileName': os.path.basename(filename),
+        'fullPath': filename
     }
+    if data:
+        print(data)
+        event_date = datetime.datetime.strptime(data['General'][0]['File_Modified_Date_Local'], '%Y-%m-%d %H:%M:%S')
+        temp['eventDate'] = event_date.strftime('%Y-%m-%dT%H:%M:%S')
+        temp['fileSize'] = data['General'][0]['FileSize']
+        temp['mediainfo'] = data
+
+    match = re.match('.*=(?P<tag>.*)\..*', os.path.basename(filename))
     if match:
         temp['tag'] = [match.groupdict()['tag']]
-    y = yaml.load('\n'.join([l for l in out[:-4] if l.count(': ') == 1]))
-    for key, value in y.items():
-        if value:
-            if key == 'File size':
-                value = float(int(value[:-6]))
-            if key == 'File name':
-                value = os.path.basename(value)
-            if key == 'Image timestamp':
-                event_date = datetime.datetime.strptime(value, '%Y:%m:%d %H:%M:%S')
-                # temp['year'] = event_date.year
-                # temp['month'] = event_date.month
-                temp['eventDate'] = event_date.strftime('%Y-%m-%dT%H:%M:%S')
-            else:
-                temp[to_camel_case(key)] = value
+
+    exiv = exiv2(filename)
+    if exiv:
+        if exiv.get('eventDate'):
+            temp['eventDate'] = exiv['eventDate']
+        temp['exiv2'] = exiv
+
     # print(temp)
+
     try:
         es.create(
             index='image',
@@ -118,13 +152,41 @@ def load_table_to_es(cursor, table, index=None):
     # return data
 
 
+def media_info(filename, ns='{https://mediaarea.net/mediainfo}'):
+    proc = subprocess.Popen(["mediainfo --Output=XML {0}".format(filename)], stdout=subprocess.PIPE, shell=True)
+    (out, err) = proc.communicate()
+    if err:
+        raise MediaInfoError('mediainfo error on {0}'.format(filename))
+    data = bf.data(ET.fromstring(out.decode('utf-8')))
+    result = collections.OrderedDict()
+    for e in my_get(data, 'MediaInfo.media.track'):
+        temp = collections.OrderedDict()
+        for k, v in e.items():
+            match = re.match('\{https://mediaarea\.net/mediainfo\}(?P<name>.+)', k)
+            if match:
+                temp[match.groupdict()['name']] = v.get('$')
+        if result.get(e['@type']):
+            result[e['@type']].append(temp)
+        else:
+            result[e['@type']] = [temp]
+    return result
+
+
+def my_get(data, key, ns='{https://mediaarea.net/mediainfo}'):
+    for e in key.split('.'):
+        data = data['{0}{1}'.format(ns, e)]
+    return data
+
+
 def oneshot(file, target, **kwargs):
     try:
-        resize(file, target=target)
-        load_jpg_to_es(file)
-        print('success')
-    except Exception:
-        raise Exception('Error: already exist')
+        data = media_info(file)
+        if 'Image' in data.keys():
+            resize(file, target=target)
+            load_jpg_to_es(file, data)
+            print('success')
+    except Exception as e:
+        raise Exception(e.__str__())
 
 
 def resize(filename, target='/home/ansaoo'):
@@ -132,7 +194,7 @@ def resize(filename, target='/home/ansaoo'):
     if not os.path.exists('{0}/{1}'.format(target, base[:7])):
         os.mkdir('{0}/{1}'.format(target, base[:7]))
     proc = subprocess.Popen(
-        ["convert {0} -auto-orient  -resize 600 {1}/{2}/{3}_thumb.jpg".format(filename, target, base[:7], base)],
+        ["convert {0} -auto-orient -resize 600 {1}/{2}/{3}_thumb.jpg".format(filename, target, base[:7], base)],
         stdout=subprocess.PIPE,
         shell=True)
     (out, err) = proc.communicate()
