@@ -1,4 +1,4 @@
-#!/home/samuel/venv3.5/bin/python3
+#!/home/ansaoo/Documents/08-myProject/pyenv/bin/python3
 import hashlib
 import sqlite3
 import requests
