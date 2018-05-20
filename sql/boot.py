@@ -95,20 +95,27 @@ def load_jpg_to_es(filename, data=None):
         'fullPath': filename
     }
     if data:
-        print(data)
+        # print(data)
         event_date = datetime.datetime.strptime(data['General'][0]['File_Modified_Date_Local'], '%Y-%m-%d %H:%M:%S')
         temp['eventDate'] = event_date.strftime('%Y-%m-%dT%H:%M:%S')
         temp['fileSize'] = data['General'][0]['FileSize']
         temp['mediainfo'] = data
 
     match = re.match('.*=(?P<tag>.*)\..*', os.path.basename(filename))
-    if match:
-        temp['tag'] = [match.groupdict()['tag']]
+    if match and match.groupdict().get('tag'):
+        temp['tag'] = [e for e in match.groupdict()['tag'].split('+')]
 
     exiv = exiv2(filename)
     if exiv:
         if exiv.get('eventDate'):
-            temp['eventDate'] = exiv['eventDate']
+            if temp.get('eventDate'):
+                temp_date = datetime.datetime.strptime(temp['eventDate'], '%Y-%m-%dT%H:%M:%S')
+                exiv_date = datetime.datetime.strptime(exiv['eventDate'], '%Y-%m-%dT%H:%M:%S')
+                diff = temp_date-exiv_date
+                if abs(diff.total_seconds()) < 86400:
+                    temp['eventDate'] = exiv_date
+            else:
+                temp['eventDate'] = exiv['eventDate']
         temp['exiv2'] = exiv
 
     # print(temp)

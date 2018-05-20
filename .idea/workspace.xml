@@ -22,12 +22,12 @@
       <file leaf-file-name="boot.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/sql/boot.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-28">
-              <caret line="93" column="47" lean-forward="false" selection-start-line="93" selection-start-column="47" selection-end-line="93" selection-end-column="47" />
+            <state relative-caret-position="1372">
+              <caret line="98" column="21" lean-forward="false" selection-start-line="98" selection-start-column="21" selection-end-line="98" selection-end-column="21" />
               <folding>
-                <element signature="e#35#49#0" expanded="true" />
-                <marker date="1526415225061" expanded="true" signature="4234:4259" ph="SELECT * FRO... missing_value" />
-                <marker date="1526415225061" expanded="true" signature="6850:6899" ph="SELECT name sqlite_master" />
+                <element signature="e#56#70#0" expanded="true" />
+                <marker date="1526826069196" expanded="true" signature="4709:4734" ph="SELECT * FRO... missing_value" />
+                <marker date="1526826069196" expanded="true" signature="7325:7374" ph="SELECT name sqlite_master" />
               </folding>
             </state>
           </provider>
@@ -117,10 +117,9 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="Scratches" />
-      <pane id="AndroidView" />
-      <pane id="Scope" />
       <pane id="PackagesPane" />
+      <pane id="Scope" />
+      <pane id="Scratches" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -132,6 +131,7 @@
           <select />
         </subPane>
       </pane>
+      <pane id="AndroidView" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -343,7 +343,11 @@
       <workItem from="1526278234566" duration="1462000" />
       <workItem from="1526325950462" duration="2742000" />
       <workItem from="1526364573056" duration="1707000" />
-      <workItem from="1526451029827" duration="599000" />
+      <workItem from="1526451029827" duration="1467000" />
+      <workItem from="1526538771015" duration="583000" />
+      <workItem from="1526622851201" duration="583000" />
+      <workItem from="1526727114783" duration="1541000" />
+      <workItem from="1526813297623" duration="2141000" />
     </task>
     <task id="LOCAL-00001" summary="Update">
       <created>1524233472558</created>
@@ -408,11 +412,25 @@
       <option name="project" value="LOCAL" />
       <updated>1525607978361</updated>
     </task>
-    <option name="localTasksCounter" value="10" />
+    <task id="LOCAL-00010" summary="Update">
+      <created>1526499172230</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1526499172230</updated>
+    </task>
+    <task id="LOCAL-00011" summary="Fix target venv">
+      <created>1526499428632</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1526499428632</updated>
+    </task>
+    <option name="localTasksCounter" value="12" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="119874000" />
+    <option name="totallyTimeSpent" value="125590000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-1" y="25" width="1258" height="740" extended-state="0" />
@@ -426,13 +444,13 @@
       <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32847896" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32847896" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Terminal" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.32847896" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.32847896" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Capture Tool" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.2866557" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.3014827" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.24958813" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="UI Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Theme Preview" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
@@ -454,9 +472,10 @@
     <option name="myLimit" value="2678400000" />
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Update" />
     <MESSAGE value="Add auto-orient in resizing process" />
-    <option name="LAST_COMMIT_MESSAGE" value="Add auto-orient in resizing process" />
+    <MESSAGE value="Update" />
+    <MESSAGE value="Fix target venv" />
+    <option name="LAST_COMMIT_MESSAGE" value="Fix target venv" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -464,15 +483,19 @@
     </breakpoint-manager>
     <watches-manager />
   </component>
+  <component name="antWorkspaceConfiguration">
+    <option name="IS_AUTOSCROLL_TO_SOURCE" value="false" />
+    <option name="FILTER_TARGETS" value="false" />
+  </component>
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/sql/boot.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
-            <element signature="e#35#49#0" expanded="true" />
-            <marker date="1526415225061" expanded="true" signature="4234:4259" ph="SELECT * FRO... missing_value" />
-            <marker date="1526415225061" expanded="true" signature="6850:6899" ph="SELECT name sqlite_master" />
+            <element signature="e#56#70#0" expanded="true" />
+            <marker date="1526826069196" expanded="true" signature="4709:4734" ph="SELECT * FRO... missing_value" />
+            <marker date="1526826069196" expanded="true" signature="7325:7374" ph="SELECT name sqlite_master" />
           </folding>
         </state>
       </provider>
@@ -482,9 +505,9 @@
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
-            <element signature="e#35#49#0" expanded="true" />
-            <marker date="1526415225061" expanded="true" signature="4234:4259" ph="SELECT * FRO... missing_value" />
-            <marker date="1526415225061" expanded="true" signature="6850:6899" ph="SELECT name sqlite_master" />
+            <element signature="e#56#70#0" expanded="true" />
+            <marker date="1526826069196" expanded="true" signature="4709:4734" ph="SELECT * FRO... missing_value" />
+            <marker date="1526826069196" expanded="true" signature="7325:7374" ph="SELECT name sqlite_master" />
           </folding>
         </state>
       </provider>
@@ -501,9 +524,9 @@
         <state relative-caret-position="714">
           <caret line="65" column="48" lean-forward="false" selection-start-line="65" selection-start-column="48" selection-end-line="65" selection-end-column="48" />
           <folding>
-            <element signature="e#35#49#0" expanded="true" />
-            <marker date="1526415225061" expanded="true" signature="4234:4259" ph="SELECT * FRO... missing_value" />
-            <marker date="1526415225061" expanded="true" signature="6850:6899" ph="SELECT name sqlite_master" />
+            <element signature="e#56#70#0" expanded="true" />
+            <marker date="1526826069196" expanded="true" signature="4709:4734" ph="SELECT * FRO... missing_value" />
+            <marker date="1526826069196" expanded="true" signature="7325:7374" ph="SELECT name sqlite_master" />
           </folding>
         </state>
       </provider>
@@ -513,9 +536,9 @@
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
-            <element signature="e#35#49#0" expanded="true" />
-            <marker date="1526415225061" expanded="true" signature="4234:4259" ph="SELECT * FRO... missing_value" />
-            <marker date="1526415225061" expanded="true" signature="6850:6899" ph="SELECT name sqlite_master" />
+            <element signature="e#56#70#0" expanded="true" />
+            <marker date="1526826069196" expanded="true" signature="4709:4734" ph="SELECT * FRO... missing_value" />
+            <marker date="1526826069196" expanded="true" signature="7325:7374" ph="SELECT name sqlite_master" />
           </folding>
         </state>
       </provider>
@@ -525,9 +548,9 @@
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
-            <element signature="e#35#49#0" expanded="true" />
-            <marker date="1526415225061" expanded="true" signature="4234:4259" ph="SELECT * FRO... missing_value" />
-            <marker date="1526415225061" expanded="true" signature="6850:6899" ph="SELECT name sqlite_master" />
+            <element signature="e#56#70#0" expanded="true" />
+            <marker date="1526826069196" expanded="true" signature="4709:4734" ph="SELECT * FRO... missing_value" />
+            <marker date="1526826069196" expanded="true" signature="7325:7374" ph="SELECT name sqlite_master" />
           </folding>
         </state>
       </provider>
@@ -537,9 +560,9 @@
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
-            <element signature="e#35#49#0" expanded="true" />
-            <marker date="1526415225061" expanded="true" signature="4234:4259" ph="SELECT * FRO... missing_value" />
-            <marker date="1526415225061" expanded="true" signature="6850:6899" ph="SELECT name sqlite_master" />
+            <element signature="e#56#70#0" expanded="true" />
+            <marker date="1526826069196" expanded="true" signature="4709:4734" ph="SELECT * FRO... missing_value" />
+            <marker date="1526826069196" expanded="true" signature="7325:7374" ph="SELECT name sqlite_master" />
           </folding>
         </state>
       </provider>
@@ -549,9 +572,9 @@
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
-            <element signature="e#35#49#0" expanded="true" />
-            <marker date="1526415225061" expanded="true" signature="4234:4259" ph="SELECT * FRO... missing_value" />
-            <marker date="1526415225061" expanded="true" signature="6850:6899" ph="SELECT name sqlite_master" />
+            <element signature="e#56#70#0" expanded="true" />
+            <marker date="1526826069196" expanded="true" signature="4709:4734" ph="SELECT * FRO... missing_value" />
+            <marker date="1526826069196" expanded="true" signature="7325:7374" ph="SELECT name sqlite_master" />
           </folding>
         </state>
       </provider>
@@ -702,12 +725,12 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/sql/boot.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-28">
-          <caret line="93" column="47" lean-forward="false" selection-start-line="93" selection-start-column="47" selection-end-line="93" selection-end-column="47" />
+        <state relative-caret-position="1372">
+          <caret line="98" column="21" lean-forward="false" selection-start-line="98" selection-start-column="21" selection-end-line="98" selection-end-column="21" />
           <folding>
-            <element signature="e#35#49#0" expanded="true" />
-            <marker date="1526415225061" expanded="true" signature="4234:4259" ph="SELECT * FRO... missing_value" />
-            <marker date="1526415225061" expanded="true" signature="6850:6899" ph="SELECT name sqlite_master" />
+            <element signature="e#56#70#0" expanded="true" />
+            <marker date="1526826069196" expanded="true" signature="4709:4734" ph="SELECT * FRO... missing_value" />
+            <marker date="1526826069196" expanded="true" signature="7325:7374" ph="SELECT name sqlite_master" />
           </folding>
         </state>
       </provider>
