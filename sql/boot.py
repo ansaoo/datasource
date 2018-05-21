@@ -86,9 +86,9 @@ def get_position(address):
         return None
 
 
-def load_jpg_to_es(filename, data=None):
+def load_jpg_to_es(filename, data=None, index='image'):
     temp = {
-        'attr': 'jpeg',
+        'attr': 'image',
         '@timestamp': str(datetime.datetime.now()).replace(' ', 'T'),
         'status': True,
         'fileName': os.path.basename(filename),
@@ -112,7 +112,9 @@ def load_jpg_to_es(filename, data=None):
                 temp_date = datetime.datetime.strptime(temp['eventDate'], '%Y-%m-%dT%H:%M:%S')
                 exiv_date = datetime.datetime.strptime(exiv['eventDate'], '%Y-%m-%dT%H:%M:%S')
                 diff = temp_date-exiv_date
-                if abs(diff.total_seconds()) < 86400:
+                if temp_date.year == exiv_date.year:
+                    temp['eventDate'] = exiv['eventDate']
+                elif abs(diff.total_seconds()) < 86400:
                     temp['eventDate'] = exiv_date
             else:
                 temp['eventDate'] = exiv['eventDate']
@@ -122,16 +124,16 @@ def load_jpg_to_es(filename, data=None):
 
     try:
         es.create(
-            index='image',
+            index=index,
             doc_type='_doc',
-            id=hashlib.md5('{0}{1}'.format('jpeg', os.path.basename(filename)).encode('utf-8')).hexdigest(),
+            id=hashlib.md5('{0}'.format(os.path.basename(filename)).encode('utf-8')).hexdigest(),
             body=temp
         )
     except Exception:
         es.update(
-            index='image',
+            index=index,
             doc_type='_doc',
-            id=hashlib.md5('{0}{1}'.format('jpeg', os.path.basename(filename)).encode('utf-8')).hexdigest(),
+            id=hashlib.md5('{0}'.format(os.path.basename(filename)).encode('utf-8')).hexdigest(),
             body={'doc': temp}
         )
     return temp
@@ -157,6 +159,40 @@ def load_table_to_es(cursor, table, index=None):
     #         body={'doc': data}
     #     )
     # return data
+
+
+def load_to_es(filename, data, index, **kwargs):
+    if 'Image' in data.keys():
+        attr = 'image'
+    elif 'Video' in data.keys():
+        attr = 'video'
+    elif 'Audio' in data.keys():
+        attr = 'audio'
+    else:
+        attr = 'other'
+    temp = {
+        'attr': attr,
+        '@timestamp': str(datetime.datetime.now()).replace(' ', 'T'),
+        'status': True,
+        'fileName': os.path.basename(filename),
+        'fullPath': filename,
+        'mediainfo': data
+    }
+    try:
+        es.create(
+            index=index,
+            doc_type='_doc',
+            id=hashlib.md5('{0}'.format(os.path.basename(filename)).encode('utf-8')).hexdigest(),
+            body=temp
+        )
+    except Exception:
+        es.update(
+            index=index,
+            doc_type='_doc',
+            id=hashlib.md5('{0}'.format(os.path.basename(filename)).encode('utf-8')).hexdigest(),
+            body={'doc': temp}
+        )
+    return temp
 
 
 def media_info(filename, ns='{https://mediaarea.net/mediainfo}'):
@@ -185,12 +221,15 @@ def my_get(data, key, ns='{https://mediaarea.net/mediainfo}'):
     return data
 
 
-def oneshot(file, target, **kwargs):
+def oneshot(file, target, index, **kwargs):
     try:
         data = media_info(file)
         if 'Image' in data.keys():
             resize(file, target=target)
-            load_jpg_to_es(file, data)
+            load_jpg_to_es(file, data, index=index)
+            print('success')
+        else:
+            load_to_es(file, data, index=index)
             print('success')
     except Exception as e:
         raise Exception(e.__str__())
