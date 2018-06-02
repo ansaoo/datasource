@@ -38,6 +38,7 @@ def bulk(cmd, target, index, **kwargs):
     files = os.popen(cmd).readlines()
     tot = len(files)
     f = open('{0}.log'.format(datetime.datetime.now().strftime('%Y-%m-%dT%H-%M-%S')), 'a')
+    f.write('# {0}\n# target: {1}\n# index: {2}\n'.format(cmd, target, index))
     print('0/{0}'.format(tot))
     err_count = 0
     for ind, file in enumerate(files):
