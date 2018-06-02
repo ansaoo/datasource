@@ -6,6 +6,7 @@ import json
 from kafka import KafkaProducer
 from elasticsearch import Elasticsearch
 import datetime
+from dateutil import parser
 from urllib.parse import urlencode
 from xmljson import badgerfish as bf
 #import piexif
@@ -20,6 +21,9 @@ import collections
 
 API_URL = "https://maps.googleapis.com/maps/api/geocode/json"
 
+winter_date = parser.parse('{0}-03-25 02:00:00'.format(datetime.datetime.now().year))
+summer_date = parser.parse('{0}-10-28 03:00:00'.format(datetime.datetime.now().year))
+
 
 class Info:
     def __init__(self, filename):
@@ -30,21 +34,20 @@ class MediaInfoError(BaseException):
     pass
 
 
-def bulk(cmd, target, **kwargs):
+def bulk(cmd, target, index, **kwargs):
     files = os.popen(cmd).readlines()
     tot = len(files)
     f = open('{0}.log'.format(datetime.datetime.now().strftime('%Y-%m-%dT%H-%M-%S')), 'a')
     print('0/{0}'.format(tot))
     err_count = 0
-    for index, file in enumerate(files):
+    for ind, file in enumerate(files):
         sys.stdout.flush()
-        print('{0}/{1}'.format(index+1, tot), end='\r')
+        print('{0}/{1}'.format(ind+1, tot), end='\r')
         try:
-            first = resize(file.strip(), target=target)
-            second = load_jpg_to_es(file.strip())
+            data = media_info(file.strip())
+            second = load_to_es(file.strip(), data=data, index=index, target=target, renamed=False)
             f.write('{0}:\n'.format(hashlib.md5(file.strip().encode('utf-8')).hexdigest()))
             f.write('  filename: {0}\n'.format(file.strip()))
-            f.write('  resize: {0}\n'.format(first))
             f.write('  es: {0}\n'.format(second))
         except Exception as e:
             err_count += 1
@@ -70,10 +73,31 @@ def exiv2(filename):
                 value = os.path.basename(value)
             if key == 'Image timestamp':
                 event_date = datetime.datetime.strptime(value, '%Y:%m:%d %H:%M:%S')
+                # event_date = parser.parse(value)
                 temp['eventDate'] = event_date.strftime('%Y-%m-%dT%H:%M:%S')
             else:
                 temp[to_camel_case(key)] = value
     return temp
+
+
+def extract_date_filename(filename):
+    matchs = re.match(
+        '(.*)_(?P<year>\d{4})(?P<month>\d{2})(?P<day>\d{2})_(?P<hour>\d{2})(?P<min>\d{2})(?P<sec>\d{2})(.*)',
+        filename
+    )
+    if matchs:
+        match = matchs.groupdict()
+        if all([
+            int(match.get('year')) < 2100,
+            int(match.get('year')) > 1970,
+            int(match.get('month')) < 13,
+            int(match.get('day')) < 32,
+            int(match.get('hour')) < 25,
+            int(match.get('min')) < 60,
+            int(match.get('sec')) < 60
+        ]):
+            return '{year}-{month}-{day}T{hour}:{min}:{sec}'.format(**match)
+    return None
 
 
 def get_position(address):
@@ -84,59 +108,6 @@ def get_position(address):
         return {'lat': float(location['lat']), 'lon': float(location['lng'])}
     except Exception:
         return None
-
-
-def load_jpg_to_es(filename, data=None, index='image'):
-    temp = {
-        'attr': 'image',
-        '@timestamp': str(datetime.datetime.now()).replace(' ', 'T'),
-        'status': True,
-        'fileName': os.path.basename(filename),
-        'fullPath': filename
-    }
-    if data:
-        # print(data)
-        event_date = datetime.datetime.strptime(data['General'][0]['File_Modified_Date_Local'], '%Y-%m-%d %H:%M:%S')
-        temp['eventDate'] = event_date.strftime('%Y-%m-%dT%H:%M:%S')
-        temp['fileSize'] = data['General'][0]['FileSize']
-        temp['mediainfo'] = data
-
-    match = re.match('.*=(?P<tag>.*)\..*', os.path.basename(filename))
-    if match and match.groupdict().get('tag'):
-        temp['tag'] = [e for e in match.groupdict()['tag'].split('+')]
-
-    exiv = exiv2(filename)
-    if exiv:
-        if exiv.get('eventDate'):
-            if temp.get('eventDate'):
-                temp_date = datetime.datetime.strptime(temp['eventDate'], '%Y-%m-%dT%H:%M:%S')
-                exiv_date = datetime.datetime.strptime(exiv['eventDate'], '%Y-%m-%dT%H:%M:%S')
-                diff = temp_date-exiv_date
-                if temp_date.year == exiv_date.year:
-                    temp['eventDate'] = exiv['eventDate']
-                elif abs(diff.total_seconds()) < 86400:
-                    temp['eventDate'] = exiv_date
-            else:
-                temp['eventDate'] = exiv['eventDate']
-        temp['exiv2'] = exiv
-
-    # print(temp)
-
-    try:
-        es.create(
-            index=index,
-            doc_type='_doc',
-            id=hashlib.md5('{0}'.format(os.path.basename(filename)).encode('utf-8')).hexdigest(),
-            body=temp
-        )
-    except Exception:
-        es.update(
-            index=index,
-            doc_type='_doc',
-            id=hashlib.md5('{0}'.format(os.path.basename(filename)).encode('utf-8')).hexdigest(),
-            body={'doc': temp}
-        )
-    return temp
 
 
 def load_table_to_es(cursor, table, index=None):
@@ -161,7 +132,7 @@ def load_table_to_es(cursor, table, index=None):
     # return data
 
 
-def load_to_es(filename, data, index, **kwargs):
+def load_to_es(filename, data, index, target, renamed=True, **kwargs):
     if 'Image' in data.keys():
         attr = 'image'
     elif 'Video' in data.keys():
@@ -174,22 +145,78 @@ def load_to_es(filename, data, index, **kwargs):
         'attr': attr,
         '@timestamp': str(datetime.datetime.now()).replace(' ', 'T'),
         'status': True,
-        'fileName': os.path.basename(filename),
-        'fullPath': filename,
-        'mediainfo': data
+        'originalFileName': os.path.basename(filename),
+        'mediainfo': data,
+        'path': 'image_tmp_path' if 'TEMP' in filename else 'image_path'
     }
+
+    if data['General'][0].get('Recorded_Date'):
+        temp['eventDate'] = parser.parse(
+            data['General'][0].get('Recorded_Date')
+        ).strftime('%Y-%m-%dT%H:%M:%S')
+    elif data['General'][0].get('Encoded_Date'):
+        date_tmp = data['General'][0].get('Encoded_Date')
+        if date_tmp.startswith('UTC'):
+            date_tmp = parser.parse(date_tmp.replace('UTC', ''))
+            if all([
+                        (winter_date - date_tmp).total_seconds() < 0,
+                        (summer_date - date_tmp).total_seconds() > 0,
+            ]):
+                date_tmp.replace(hour=date_tmp.hour + 2)
+            else:
+                date_tmp.replace(hour=date_tmp.hour + 1)
+        temp['eventDate'] = date_tmp.strftime('%Y-%m-%dT%H:%M:%S')
+    elif extract_date_filename(filename):
+        temp['eventDate'] = extract_date_filename(filename)
+    else:
+        temp['eventDate'] = parser.parse(
+            data['General'][0].get('File_Modified_Date_Local')
+        ).strftime('%Y-%m-%dT%H:%M:%S')
+
+    match = re.match('.*=(?P<tag>.*)\..*', os.path.basename(filename))
+    if match and match.groupdict().get('tag'):
+        temp['tag'] = [e for e in match.groupdict()['tag'].split('+')]
+
+    if attr == 'image':
+        exiv = exiv2(filename)
+        if exiv:
+            if exiv.get('eventDate'):
+                if temp.get('eventDate'):
+                    temp_date = parser.parse(temp['eventDate'])
+                    exiv_date = parser.parse(exiv['eventDate'])
+                    diff = temp_date-exiv_date
+                    if temp_date.year == exiv_date.year:
+                        temp['eventDate'] = exiv['eventDate']
+                    elif abs(diff.total_seconds()) < 86400:
+                        temp['eventDate'] = exiv_date
+                else:
+                    temp['eventDate'] = exiv['eventDate']
+            temp['exiv2'] = exiv
+
+    if renamed:
+        root, file = os.path.split(filename)
+        final_date = parser.parse(temp['eventDate'])
+        new_name = '{0}/{1}_{2}'.format(root, final_date.strftime('%Y-%m-%d_%Hh%Mm%S'), file)
+        os.rename(filename, new_name)
+    else:
+        new_name = filename
+
+    temp['fileName'] = os.path.basename(new_name)
+
+    create_thumbnail(new_name, target=target)
+
     try:
         es.create(
             index=index,
             doc_type='_doc',
-            id=hashlib.md5('{0}'.format(os.path.basename(filename)).encode('utf-8')).hexdigest(),
+            id=hashlib.md5('{0}'.format(os.path.basename(new_name)).encode('utf-8')).hexdigest(),
             body=temp
         )
     except Exception:
         es.update(
             index=index,
             doc_type='_doc',
-            id=hashlib.md5('{0}'.format(os.path.basename(filename)).encode('utf-8')).hexdigest(),
+            id=hashlib.md5('{0}'.format(os.path.basename(new_name)).encode('utf-8')).hexdigest(),
             body={'doc': temp}
         )
     return temp
@@ -224,18 +251,13 @@ def my_get(data, key, ns='{https://mediaarea.net/mediainfo}'):
 def oneshot(file, target, index, **kwargs):
     try:
         data = media_info(file)
-        if 'Image' in data.keys():
-            resize(file, target=target)
-            load_jpg_to_es(file, data, index=index)
-            print('success')
-        else:
-            load_to_es(file, data, index=index)
-            print('success')
+        load_to_es(file, data, index=index, target=target)
+        print('success')
     except Exception as e:
         raise Exception(e.__str__())
 
 
-def resize(filename, target='/home/ansaoo'):
+def create_thumbnail(filename, target='/home/ansaoo'):
     base = os.path.basename(filename)
     if not os.path.exists('{0}/{1}'.format(target, base[:7])):
         os.mkdir('{0}/{1}'.format(target, base[:7]))
@@ -269,48 +291,48 @@ def to_camel_case(word):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--mode',
-                        # nargs=1,
-                        default='oneshot',
-                        type=str,
-                        required=True,
-                        choices=['oneshot', 'bulk', 'sql'],
-                        help='mode [oneshot|bulk|sql]. Default=oneshot')
-    parser.add_argument('--index',
-                        # nargs=1,
-                        default='image',
-                        type=str,
-                        help='label index to use. Default=image')
-    parser.add_argument('--file',
-                        # nargs=1,
-                        default=None,
-                        type=str,
-                        help='file to load. Only use with mode=oneshot. Default=None')
-    parser.add_argument('--target',
-                        # nargs=1,
-                        default='~/Images/thumbnail',
-                        type=str,
-                        help='loading img process create thumbnails.'
-                             ' This define repository to store thumbnails.'
-                             ' default=\'~/Images/thumbnail\'')
-    parser.add_argument('--cmd',
-                        # nargs=1,
-                        default='find ~/Images/20* -iname "*.jpg"',
-                        type=str,
-                        help='command line to get multiple file to load. Only use with mode=bulk.'
-                             ' Default=\'find ~/Images/20* -iname "*.jpg"\'')
-    parser.add_argument('--db',
-                        # nargs=1,
-                        default=None,
-                        type=str,
-                        help='sqlite database to load (all table exist)')
-    parser.add_argument('--table',
-                        # nargs=1,
-                        default=None,
-                        type=str,
-                        help='sqlite specific table to load. Needs define db.')
-    args = parser.parse_args()
+    arg_parser = argparse.ArgumentParser()
+    arg_parser.add_argument('--mode',
+                            # nargs=1,
+                            default='oneshot',
+                            type=str,
+                            required=True,
+                            choices=['oneshot', 'bulk', 'sql'],
+                            help='mode [oneshot|bulk|sql]. Default=oneshot')
+    arg_parser.add_argument('--index',
+                            # nargs=1,
+                            default='image',
+                            type=str,
+                            help='label index to use. Default=image')
+    arg_parser.add_argument('--file',
+                            # nargs=1,
+                            default=None,
+                            type=str,
+                            help='file to load. Only use with mode=oneshot. Default=None')
+    arg_parser.add_argument('--target',
+                            # nargs=1,
+                            default='~/Images/thumbnail',
+                            type=str,
+                            help='loading img process create thumbnails.'
+                                 ' This define repository to store thumbnails.'
+                                 ' default=\'~/Images/thumbnail\'')
+    arg_parser.add_argument('--cmd',
+                            # nargs=1,
+                            default='find ~/Images/20* -iname "*.jpg"',
+                            type=str,
+                            help='command line to get multiple file to load. Only use with mode=bulk.'
+                                 ' Default=\'find ~/Images/20* -iname "*.jpg"\'')
+    arg_parser.add_argument('--db',
+                            # nargs=1,
+                            default=None,
+                            type=str,
+                            help='sqlite database to load (all table exist)')
+    arg_parser.add_argument('--table',
+                            # nargs=1,
+                            default=None,
+                            type=str,
+                            help='sqlite specific table to load. Needs define db.')
+    args = arg_parser.parse_args()
     es = Elasticsearch()
 
     fct = {
