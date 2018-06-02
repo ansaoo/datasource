@@ -204,7 +204,8 @@ def load_to_es(filename, data, index, target, renamed=True, **kwargs):
 
     temp['fileName'] = os.path.basename(new_name)
 
-    create_thumbnail(new_name, target=target)
+    if attr == 'image':
+        create_thumbnail(new_name, target=target)
 
     try:
         es.create(
