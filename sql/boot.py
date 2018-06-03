@@ -34,6 +34,10 @@ class MediaInfoError(BaseException):
     pass
 
 
+class ThumbnailError(BaseException):
+    pass
+
+
 def bulk(cmd, target, index, **kwargs):
     files = os.popen(cmd).readlines()
     tot = len(files)
@@ -164,9 +168,9 @@ def load_to_es(filename, data, index, target, renamed=True, **kwargs):
                         (winter_date - date_tmp).total_seconds() < 0,
                         (summer_date - date_tmp).total_seconds() > 0,
             ]):
-                date_tmp.replace(hour=date_tmp.hour + 2)
+                date_tmp = date_tmp.replace(hour=date_tmp.hour + 2)
             else:
-                date_tmp.replace(hour=date_tmp.hour + 1)
+                date_tmp = date_tmp.replace(hour=date_tmp.hour + 1)
         temp['eventDate'] = date_tmp.strftime('%Y-%m-%dT%H:%M:%S')
     elif extract_date_filename(filename):
         temp['eventDate'] = extract_date_filename(filename)
@@ -205,8 +209,7 @@ def load_to_es(filename, data, index, target, renamed=True, **kwargs):
 
     temp['fileName'] = os.path.basename(new_name)
 
-    if attr == 'image':
-        create_thumbnail(new_name, target=target)
+    create_thumbnail(new_name, target=target, attr=attr)
 
     try:
         es.create(
@@ -260,16 +263,26 @@ def oneshot(file, target, index, **kwargs):
         raise Exception(e.__str__())
 
 
-def create_thumbnail(filename, target='/home/ansaoo'):
+def create_thumbnail(filename, target='/home/ansaoo', attr='image'):
+    img_script = "convert {0} -auto-orient -resize 600 {1}/{2}/{3}_thumb.jpg"
+    video_script = "ffmpeg -i {0} -ss 00:00:00.435 -vframes 1 {1}/{2}/{3}_thumb.jpg"
+    if attr == 'image':
+        cmd = img_script
+    elif attr == 'video':
+        cmd = video_script
+    else:
+        return None
     base = os.path.basename(filename)
     if not os.path.exists('{0}/{1}'.format(target, base[:7])):
         os.mkdir('{0}/{1}'.format(target, base[:7]))
     proc = subprocess.Popen(
-        ["convert {0} -auto-orient -resize 600 {1}/{2}/{3}_thumb.jpg".format(filename, target, base[:7], base)],
+        [cmd.format(filename, target, base[:7], base)],
         stdout=subprocess.PIPE,
         shell=True)
     (out, err) = proc.communicate()
-    return err
+    if err:
+        raise ThumbnailError(err)
+    return None
 
 
 def sql(db, table=None, **kwargs):
