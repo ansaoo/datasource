@@ -39,7 +39,7 @@ def bulk(cmd, target, index, **kwargs):
     tot = len(files)
     f = open('{0}.log'.format(datetime.datetime.now().strftime('%Y-%m-%dT%H-%M-%S')), 'a')
     f.write('# {0}\n# target: {1}\n# index: {2}\n'.format(cmd, target, index))
-    print('0/{0}'.format(tot))
+    print('0/{0}'.format(tot), end='\r')
     err_count = 0
     for ind, file in enumerate(files):
         sys.stdout.flush()
@@ -55,6 +55,7 @@ def bulk(cmd, target, index, **kwargs):
             f.write('{0}:\n'.format(hashlib.md5(file.strip().encode('utf-8')).hexdigest()))
             f.write('  filename: {0}\n'.format(file.strip()))
             f.write('  error: "{0}"\n'.format(e.__str__()))
+    f.write('# nb error: {0}'.format(err_count))
     print('nb error: ', err_count)
 
 
