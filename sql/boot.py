@@ -265,7 +265,7 @@ def oneshot(file, target, index, **kwargs):
 
 def create_thumbnail(filename, target='/home/ansaoo', attr='image'):
     img_script = "convert {0} -auto-orient -resize 600 {1}/{2}/{3}_thumb.jpg"
-    video_script = "ffmpeg -i {0} -ss 00:00:00.435 -vframes 1 {1}/{2}/{3}_thumb.jpg"
+    video_script = "ffmpeg -i {0} -v 0 -f -ss 00:00:00.435 -vframes 1 {1}/{2}/{3}_thumb.jpg"
     if attr == 'image':
         cmd = img_script
     elif attr == 'video':
