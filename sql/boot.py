@@ -198,8 +198,7 @@ def load_to_es(filename, data, index, target, renamed=True, **kwargs):
         date_tmp = parser.parse(
             data['General'][0].get('File_Modified_Date_Local')
         )
-        if is_valid_date(date_tmp):
-            temp['eventDate'] = date_tmp.strftime('%Y-%m-%dT%H:%M:%S')
+        temp['eventDate'] = date_tmp.strftime('%Y-%m-%dT%H:%M:%S')
 
     match = re.match('.*=(?P<tag>.*)\..*', os.path.basename(filename))
     if match and match.groupdict().get('tag'):
