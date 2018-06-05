@@ -190,15 +190,16 @@ def load_to_es(filename, data, index, target, renamed=True, **kwargs):
                 )
         if is_valid_date(date_tmp):
             temp['eventDate'] = date_tmp.strftime('%Y-%m-%dT%H:%M:%S')
-    elif extract_date_filename(filename):
+    if temp.get('eventDate') is None and extract_date_filename(filename):
         date_tmp = extract_date_filename(filename)
         if is_valid_date(date_tmp):
             temp['eventDate'] = date_tmp.strftime('%Y-%m-%dT%H:%M:%S')
-    else:
+    if temp.get('eventDate') is None:
         date_tmp = parser.parse(
             data['General'][0].get('File_Modified_Date_Local')
         )
-        temp['eventDate'] = date_tmp.strftime('%Y-%m-%dT%H:%M:%S')
+        if is_valid_date(date_tmp):
+            temp['eventDate'] = date_tmp.strftime('%Y-%m-%dT%H:%M:%S')
 
     match = re.match('.*=(?P<tag>.*)\..*', os.path.basename(filename))
     if match and match.groupdict().get('tag'):
@@ -219,6 +220,9 @@ def load_to_es(filename, data, index, target, renamed=True, **kwargs):
                 else:
                     temp['eventDate'] = exiv['eventDate']
             temp['exiv2'] = exiv
+
+    if temp.get('eventDate') is None:
+        temp['eventDate'] = datetime.datetime.now().strftime('%Y-%m-%dT%H:%M:%S')
 
     if renamed:
         root, file = os.path.split(filename)
