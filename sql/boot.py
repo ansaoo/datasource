@@ -41,7 +41,7 @@ class ThumbnailError(BaseException):
 def bulk(cmd, target, index, **kwargs):
     files = os.popen(cmd).readlines()
     tot = len(files)
-    f = open('{0}.log'.format(datetime.datetime.now().strftime('%Y-%m-%dT%H-%M-%S')), 'a')
+    f = open('{0}.log'.format(datetime.datetime.now().strftime('%Y-%m-%dT%H-%M-%S.%f')), 'a')
     f.write('# {0}\n# target: {1}\n# index: {2}\n'.format(cmd, target, index))
     print('0/{0}'.format(tot), end='\r')
     err_count = 0
@@ -168,9 +168,17 @@ def load_to_es(filename, data, index, target, renamed=True, **kwargs):
                         (winter_date - date_tmp).total_seconds() < 0,
                         (summer_date - date_tmp).total_seconds() > 0,
             ]):
-                date_tmp = date_tmp.replace(hour=date_tmp.hour + 2)
+                hour_delta = 2
             else:
-                date_tmp = date_tmp.replace(hour=date_tmp.hour + 1)
+                hour_delta = 1
+            if date_tmp.hour + hour_delta < 24:
+                date_tmp = date_tmp.replace(hour=date_tmp.hour + hour_delta)
+            else:
+                date_tmp = date_tmp.replace(
+                    hour=date_tmp.hour + hour_delta - 24
+                ).replace(
+                    day=date_tmp.day + 1
+                )
         temp['eventDate'] = date_tmp.strftime('%Y-%m-%dT%H:%M:%S')
     elif extract_date_filename(filename):
         temp['eventDate'] = extract_date_filename(filename)
