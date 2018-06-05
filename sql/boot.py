@@ -98,11 +98,11 @@ def extract_date_filename(filename):
             int(match.get('year')) > 1970,
             int(match.get('month')) < 13,
             int(match.get('day')) < 32,
-            int(match.get('hour')) < 25,
+            int(match.get('hour')) < 24,
             int(match.get('min')) < 60,
             int(match.get('sec')) < 60
         ]):
-            return '{year}-{month}-{day}T{hour}:{min}:{sec}'.format(**match)
+            return parser.parse('{year}-{month}-{day}T{hour}:{min}:{sec}'.format(**match))
     return None
 
 
@@ -114,6 +114,13 @@ def get_position(address):
         return {'lat': float(location['lat']), 'lon': float(location['lng'])}
     except Exception:
         return None
+
+
+def is_valid_date(date_time):
+    return all([
+        date_time.year < 2100,
+        date_time.year > 1980
+    ])
 
 
 def load_table_to_es(cursor, table, index=None):
@@ -157,9 +164,11 @@ def load_to_es(filename, data, index, target, renamed=True, **kwargs):
     }
 
     if data['General'][0].get('Recorded_Date'):
-        temp['eventDate'] = parser.parse(
+        date_tmp = parser.parse(
             data['General'][0].get('Recorded_Date')
-        ).strftime('%Y-%m-%dT%H:%M:%S')
+        )
+        if is_valid_date(date_tmp):
+            temp['eventDate'] = date_tmp.strftime('%Y-%m-%dT%H:%M:%S')
     elif data['General'][0].get('Encoded_Date'):
         date_tmp = data['General'][0].get('Encoded_Date')
         if date_tmp.startswith('UTC'):
@@ -179,13 +188,18 @@ def load_to_es(filename, data, index, target, renamed=True, **kwargs):
                 ).replace(
                     day=date_tmp.day + 1
                 )
-        temp['eventDate'] = date_tmp.strftime('%Y-%m-%dT%H:%M:%S')
+        if is_valid_date(date_tmp):
+            temp['eventDate'] = date_tmp.strftime('%Y-%m-%dT%H:%M:%S')
     elif extract_date_filename(filename):
-        temp['eventDate'] = extract_date_filename(filename)
+        date_tmp = extract_date_filename(filename)
+        if is_valid_date(date_tmp):
+            temp['eventDate'] = date_tmp.strftime('%Y-%m-%dT%H:%M:%S')
     else:
-        temp['eventDate'] = parser.parse(
+        date_tmp = parser.parse(
             data['General'][0].get('File_Modified_Date_Local')
-        ).strftime('%Y-%m-%dT%H:%M:%S')
+        )
+        if is_valid_date(date_tmp):
+            temp['eventDate'] = date_tmp.strftime('%Y-%m-%dT%H:%M:%S')
 
     match = re.match('.*=(?P<tag>.*)\..*', os.path.basename(filename))
     if match and match.groupdict().get('tag'):
