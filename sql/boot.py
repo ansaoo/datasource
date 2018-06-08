@@ -208,17 +208,17 @@ def load_to_es(filename, data, index, target, renamed=True, **kwargs):
     if attr == 'image':
         exiv = exiv2(filename)
         if exiv:
-            if exiv.get('eventDate'):
-                if temp.get('eventDate'):
-                    temp_date = parser.parse(temp['eventDate'])
-                    exiv_date = parser.parse(exiv['eventDate'])
-                    diff = temp_date-exiv_date
-                    if temp_date.year == exiv_date.year:
-                        temp['eventDate'] = exiv['eventDate']
-                    elif abs(diff.total_seconds()) < 86400:
-                        temp['eventDate'] = exiv_date
-                else:
-                    temp['eventDate'] = exiv['eventDate']
+            # if exiv.get('eventDate'):
+            #     if temp.get('eventDate'):
+            #         temp_date = parser.parse(temp['eventDate'])
+            #         exiv_date = parser.parse(exiv['eventDate'])
+            #         diff = temp_date-exiv_date
+            #         if temp_date.year == exiv_date.year:
+            #             temp['eventDate'] = exiv['eventDate']
+            #         elif abs(diff.total_seconds()) < 86400:
+            #             temp['eventDate'] = exiv_date
+            #     else:
+            #         temp['eventDate'] = exiv['eventDate']
             temp['exiv2'] = exiv
 
     if temp.get('eventDate') is None:

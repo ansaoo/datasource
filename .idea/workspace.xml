@@ -22,12 +22,12 @@
       <file leaf-file-name="boot.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/sql/boot.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="56">
-              <caret line="90" column="0" lean-forward="false" selection-start-line="90" selection-start-column="0" selection-end-line="90" selection-end-column="0" />
+            <state relative-caret-position="238">
+              <caret line="220" column="23" lean-forward="true" selection-start-line="210" selection-start-column="20" selection-end-line="220" selection-end-column="23" />
               <folding>
                 <element signature="e#56#70#0" expanded="true" />
-                <marker date="1528490261189" expanded="true" signature="4105:4130" ph="SELECT * FRO... missing_value" />
-                <marker date="1528490261189" expanded="true" signature="11031:11080" ph="SELECT name sqlite_master" />
+                <marker date="1528490351734" expanded="true" signature="4105:4130" ph="SELECT * FRO... missing_value" />
+                <marker date="1528490351734" expanded="true" signature="11053:11102" ph="SELECT name sqlite_master" />
               </folding>
             </state>
           </provider>
@@ -365,7 +365,7 @@
       <workItem from="1528038975554" duration="6024000" />
       <workItem from="1528091883365" duration="1922000" />
       <workItem from="1528176931991" duration="4036000" />
-      <workItem from="1528489671845" duration="597000" />
+      <workItem from="1528489671845" duration="696000" />
     </task>
     <task id="LOCAL-00001" summary="Update">
       <created>1524233472558</created>
@@ -535,11 +535,18 @@
       <option name="project" value="LOCAL" />
       <updated>1528489984274</updated>
     </task>
-    <option name="localTasksCounter" value="25" />
+    <task id="LOCAL-00025" summary="Fix extract date from filename">
+      <created>1528490273576</created>
+      <option name="number" value="00025" />
+      <option name="presentableId" value="LOCAL-00025" />
+      <option name="project" value="LOCAL" />
+      <updated>1528490273576</updated>
+    </task>
+    <option name="localTasksCounter" value="26" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="171828000" />
+    <option name="totallyTimeSpent" value="171927000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-1" y="25" width="1258" height="740" extended-state="0" />
@@ -609,8 +616,8 @@
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
             <element signature="e#56#70#0" expanded="true" />
-            <marker date="1528490261189" expanded="true" signature="4105:4130" ph="SELECT * FRO... missing_value" />
-            <marker date="1528490261189" expanded="true" signature="11031:11080" ph="SELECT name sqlite_master" />
+            <marker date="1528490351734" expanded="true" signature="4105:4130" ph="SELECT * FRO... missing_value" />
+            <marker date="1528490351734" expanded="true" signature="11053:11102" ph="SELECT name sqlite_master" />
           </folding>
         </state>
       </provider>
@@ -621,8 +628,8 @@
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
             <element signature="e#56#70#0" expanded="true" />
-            <marker date="1528490261189" expanded="true" signature="4105:4130" ph="SELECT * FRO... missing_value" />
-            <marker date="1528490261189" expanded="true" signature="11031:11080" ph="SELECT name sqlite_master" />
+            <marker date="1528490351734" expanded="true" signature="4105:4130" ph="SELECT * FRO... missing_value" />
+            <marker date="1528490351734" expanded="true" signature="11053:11102" ph="SELECT name sqlite_master" />
           </folding>
         </state>
       </provider>
@@ -640,8 +647,8 @@
           <caret line="65" column="48" lean-forward="false" selection-start-line="65" selection-start-column="48" selection-end-line="65" selection-end-column="48" />
           <folding>
             <element signature="e#56#70#0" expanded="true" />
-            <marker date="1528490261189" expanded="true" signature="4105:4130" ph="SELECT * FRO... missing_value" />
-            <marker date="1528490261189" expanded="true" signature="11031:11080" ph="SELECT name sqlite_master" />
+            <marker date="1528490351734" expanded="true" signature="4105:4130" ph="SELECT * FRO... missing_value" />
+            <marker date="1528490351734" expanded="true" signature="11053:11102" ph="SELECT name sqlite_master" />
           </folding>
         </state>
       </provider>
@@ -652,8 +659,8 @@
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
             <element signature="e#56#70#0" expanded="true" />
-            <marker date="1528490261189" expanded="true" signature="4105:4130" ph="SELECT * FRO... missing_value" />
-            <marker date="1528490261189" expanded="true" signature="11031:11080" ph="SELECT name sqlite_master" />
+            <marker date="1528490351734" expanded="true" signature="4105:4130" ph="SELECT * FRO... missing_value" />
+            <marker date="1528490351734" expanded="true" signature="11053:11102" ph="SELECT name sqlite_master" />
           </folding>
         </state>
       </provider>
@@ -664,8 +671,8 @@
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
             <element signature="e#56#70#0" expanded="true" />
-            <marker date="1528490261189" expanded="true" signature="4105:4130" ph="SELECT * FRO... missing_value" />
-            <marker date="1528490261189" expanded="true" signature="11031:11080" ph="SELECT name sqlite_master" />
+            <marker date="1528490351734" expanded="true" signature="4105:4130" ph="SELECT * FRO... missing_value" />
+            <marker date="1528490351734" expanded="true" signature="11053:11102" ph="SELECT name sqlite_master" />
           </folding>
         </state>
       </provider>
@@ -676,8 +683,8 @@
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
             <element signature="e#56#70#0" expanded="true" />
-            <marker date="1528490261189" expanded="true" signature="4105:4130" ph="SELECT * FRO... missing_value" />
-            <marker date="1528490261189" expanded="true" signature="11031:11080" ph="SELECT name sqlite_master" />
+            <marker date="1528490351734" expanded="true" signature="4105:4130" ph="SELECT * FRO... missing_value" />
+            <marker date="1528490351734" expanded="true" signature="11053:11102" ph="SELECT name sqlite_master" />
           </folding>
         </state>
       </provider>
@@ -688,8 +695,8 @@
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
             <element signature="e#56#70#0" expanded="true" />
-            <marker date="1528490261189" expanded="true" signature="4105:4130" ph="SELECT * FRO... missing_value" />
-            <marker date="1528490261189" expanded="true" signature="11031:11080" ph="SELECT name sqlite_master" />
+            <marker date="1528490351734" expanded="true" signature="4105:4130" ph="SELECT * FRO... missing_value" />
+            <marker date="1528490351734" expanded="true" signature="11053:11102" ph="SELECT name sqlite_master" />
           </folding>
         </state>
       </provider>
@@ -840,12 +847,12 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/sql/boot.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="56">
-          <caret line="90" column="0" lean-forward="false" selection-start-line="90" selection-start-column="0" selection-end-line="90" selection-end-column="0" />
+        <state relative-caret-position="238">
+          <caret line="220" column="23" lean-forward="true" selection-start-line="210" selection-start-column="20" selection-end-line="220" selection-end-column="23" />
           <folding>
             <element signature="e#56#70#0" expanded="true" />
-            <marker date="1528490261189" expanded="true" signature="4105:4130" ph="SELECT * FRO... missing_value" />
-            <marker date="1528490261189" expanded="true" signature="11031:11080" ph="SELECT name sqlite_master" />
+            <marker date="1528490351734" expanded="true" signature="4105:4130" ph="SELECT * FRO... missing_value" />
+            <marker date="1528490351734" expanded="true" signature="11053:11102" ph="SELECT name sqlite_master" />
           </folding>
         </state>
       </provider>
