@@ -88,7 +88,7 @@ def exiv2(filename):
 
 def extract_date_filename(filename):
     matchs = re.match(
-       '(?P<year>\d{4})-(?P<month>\d{2})-(?P<day>\d{2})_(?P<hour>\d{2})h(?P<min>\d{2})m(?P<sec>\d{2})_(.*)',
+        '(.*)_(?P<year>\d{4})(?P<month>\d{2})(?P<day>\d{2})_(?P<hour>\d{2})(?P<min>\d{2})(?P<sec>\d{2})(.*)',
         filename
     )
     if matchs:
@@ -103,6 +103,23 @@ def extract_date_filename(filename):
             int(match.get('sec')) < 60
         ]):
             return parser.parse('{year}-{month}-{day}T{hour}:{min}:{sec}'.format(**match))
+    else:
+        matchs = re.match(
+            '(?P<year>\d{4})-(?P<month>\d{2})-(?P<day>\d{2})_(?P<hour>\d{2})h(?P<min>\d{2})m(?P<sec>\d{2})_(.*)',
+            filename
+        )
+        if matchs:
+            match = matchs.groupdict()
+            if all([
+                        int(match.get('year')) < 2100,
+                        int(match.get('year')) > 1970,
+                        int(match.get('month')) < 13,
+                        int(match.get('day')) < 32,
+                        int(match.get('hour')) < 24,
+                        int(match.get('min')) < 60,
+                        int(match.get('sec')) < 60
+            ]):
+                return parser.parse('{year}-{month}-{day}T{hour}:{min}:{sec}'.format(**match))
     return None
 
 
@@ -208,17 +225,20 @@ def load_to_es(filename, data, index, target, renamed=True, **kwargs):
     if attr == 'image':
         exiv = exiv2(filename)
         if exiv:
-            # if exiv.get('eventDate'):
-            #     if temp.get('eventDate'):
-            #         temp_date = parser.parse(temp['eventDate'])
-            #         exiv_date = parser.parse(exiv['eventDate'])
-            #         diff = temp_date-exiv_date
-            #         if temp_date.year == exiv_date.year:
-            #             temp['eventDate'] = exiv['eventDate']
-            #         elif abs(diff.total_seconds()) < 86400:
-            #             temp['eventDate'] = exiv_date
-            #     else:
-            #         temp['eventDate'] = exiv['eventDate']
+            if exiv.get('eventDate'):
+                if temp.get('eventDate'):
+                    temp_date = parser.parse(temp['eventDate'])
+                    exiv_date = parser.parse(exiv['eventDate'])
+                    if is_valid_date(exiv_date):
+                        diff = temp_date-exiv_date
+                        if temp_date.year == exiv_date.year:
+                            temp['eventDate'] = exiv['eventDate']
+                        elif abs(diff.total_seconds()) < 86400:
+                            temp['eventDate'] = exiv_date
+                else:
+                    exiv_date = parser.parse(exiv['eventDate'])
+                    if is_valid_date(exiv_date):
+                        temp['eventDate'] = exiv['eventDate']
             temp['exiv2'] = exiv
 
     if temp.get('eventDate') is None:
