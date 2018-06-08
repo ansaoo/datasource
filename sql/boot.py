@@ -88,7 +88,8 @@ def exiv2(filename):
 
 def extract_date_filename(filename):
     matchs = re.match(
-        '(.*)_(?P<year>\d{4})(?P<month>\d{2})(?P<day>\d{2})_(?P<hour>\d{2})(?P<min>\d{2})(?P<sec>\d{2})(.*)',
+        '(.*)_(?P<year>\d{4})(?P<month>\d{2})(?P<day>\d{2})_(?P<hour>\d{2})(?P<min>\d{2})(?P<sec>\d{2})(.*)|'
+        '(?P<year>\d{4})-(?P<month>\d{2})-(?P<day>\d{2})_(?P<hour>\d{2})h(?P<min>\d{2})m(?P<sec>\d{2})_(.*)',
         filename
     )
     if matchs:
