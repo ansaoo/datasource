@@ -342,13 +342,15 @@ def sql(db, table=None, **kwargs):
 
 
 def to_camel_case(word):
-    tmp = ''
-    for index, token in enumerate(word.lower().split(' ')):
-        if index == 0:
-            tmp += token
-        else:
-            tmp += token.capitalize()
-    return tmp
+    # tmp = ''
+    # for index, token in enumerate(word.lower().split(' ')):
+    #     if index == 0:
+    #         tmp += token
+    #     else:
+    #         tmp += token.capitalize()
+    return ''.join([
+        t if i == 0 else t.capitalize() for i, t in enumerate(word.lower().split(' '))
+    ])
 
 
 if __name__ == "__main__":
