@@ -33,7 +33,7 @@ class MovieInfo:
 
     def merge(self):
         global args
-        proc = subprocess.Popen(
+        proc = subprocess.run(
             ["mkvmerge --output {0}/{1} --title \"{2}\" --global-tags {3} {4}".format(
                 args.target,
                 self.output,
@@ -41,12 +41,10 @@ class MovieInfo:
                 self.tags,
                 self.filename
             )],
-            stderr=subprocess.PIPE,
             shell=True)
-        (out, err) = proc.communicate()
-        if err:
-            print("\033[91m {0} \033[0m".format(err))
-            raise MkvPropEditError('mkvpropedit merge file error on {0}'.format(self.filename))
+        if proc.returncode > 0:
+            print("\x1b[0;30;41m Error \x1b[0m")
+            raise MkvPropEditError('mkvmerge file error on {0}'.format(self.filename))
 
     def set_chapter(self):
         if os.path.exists(self.chapters.format(self.name)):
@@ -150,39 +148,45 @@ def create_simple(key, val):
 
 
 def set_chapter(filename, chapter_file):
+    print("update chapter ... ", end="\r")
     proc = subprocess.Popen(
         ["mkvpropedit {0} --chapters {1}".format(filename, chapter_file)],
         stdout=subprocess.PIPE,
         shell=True)
     (out, err) = proc.communicate()
     if err:
-        print("\033[91m {0} \033[0m".format(err))
+        print("update chapter ... \x1b[0;30;41m Error \x1b[0m")
+        print(err)
         raise MkvPropEditError('mkvpropedit set chapters error on {0}'.format(filename))
-    print("... chapter updated")
+    print("update chapter ... \33[32m Ok \33[0m")
 
 
 def set_tag(filename, tag_xml_file):
+    print("update tag ... ", end="\r")
     proc = subprocess.Popen(
         ["mkvpropedit {0} --tags global:{1}".format(filename, tag_xml_file)],
         stdout=subprocess.PIPE,
         shell=True)
     (out, err) = proc.communicate()
     if err:
-        print("\033[91m {0} \033[0m".format(err))
+        print("update tag ... \x1b[0;30;41m Error \x1b[0m")
+        print(err)
         raise MkvPropEditError('mkvpropedit set tags error on {0}'.format(filename))
-    print("... tag updated")
+    print("update tag ... \33[32m Ok \33[0m")
 
 
 def set_title(filename, title, **kwargs):
+    print("update title ... ", end="\r")
     proc = subprocess.Popen(
         ["mkvpropedit {0} --edit info --set \"title={1}\"".format(filename, title)],
         stdout=subprocess.PIPE,
         shell=True)
     (out, err) = proc.communicate()
     if err:
-        print("\033[91m {0} \033[0m".format(err))
+        print("update title ... \x1b[0;30;41m Error \x1b[0m")
+        print(err)
         raise MkvPropEditError('mkvpropedit set title error on {0}'.format(filename))
-    print("... title updated")
+    print("update title ... \33[32m Ok \33[0m")
 
 
 if __name__ == "__main__":
