@@ -217,18 +217,22 @@ if __name__ == "__main__":
         'webdl': 'WebDL',
         'dvd': 'DVD-Video'
     }
-    if args.mode == 'update':
-        print("Work: {0}".format(args.file))
-        movie = MovieInfo(args.file)
-        movie.to_xml()
-        movie.set_title()
-        movie.set_chapter()
-        movie.set_tag()
-    if args.mode == 'merge':
-        print("Work: {0}".format(args.file))
-        movie = MovieInfo(args.file)
-        movie.to_xml()
-        movie.set_chapter()
-        movie.merge()
-    print("\x1b[6;30;42m Success! \x1b[0m")
+    try:
+        if args.mode == 'update':
+            print("Work: {0}".format(args.file))
+            movie = MovieInfo(args.file)
+            movie.to_xml()
+            movie.set_title()
+            movie.set_chapter()
+            movie.set_tag()
+        if args.mode == 'merge':
+            print("Work: {0}".format(args.file))
+            movie = MovieInfo(args.file)
+            movie.to_xml()
+            movie.set_chapter()
+            movie.merge()
+        print("\x1b[6;30;42m Success! \x1b[0m")
+    except Exception as e:
+        print("\x1b[0;30;41m Failed \x1b[0m")
+        print(e.__str__())
 
