@@ -4,7 +4,6 @@ import argparse
 import os
 import re
 import subprocess
-import sys
 import xmltodict
 import xml.etree.ElementTree as ET
 from functools import reduce
@@ -14,6 +13,7 @@ class MovieInfo:
     def __init__(self, filename):
         self.name = os.path.splitext(filename)[0]
         self.chapters = "{0}.chapters.txt"
+        self.chapters_file = None
         self.filename = filename
         matchs = re.match(
             "(?P<movie_name>.+)\.(?P<year_of_release>\d{4})(\.(?P<original_source_medium>\w+))?(-(?P<encoder>.+))?\.\w{3}$",
@@ -28,36 +28,44 @@ class MovieInfo:
         self.mediainfo = media_info(filename)
         self.tags = None
 
+    def check_chapter(self):
+        if os.path.exists(self.chapters.format(self.name)):
+            self.chapters_file = self.chapters.format(self.name)
+        elif self.parsed and os.path.exists(self.chapters.format(
+                "{0}.{1}".format(self.parsed.get("movie_name"), self.parsed.get("year_of_release"))
+        )):
+            self.chapters_file = self.chapters.format(
+                "{0}.{1}".format(self.parsed.get("movie_name"), self.parsed.get("year_of_release"))
+            )
+        return self.chapters_file
+
     def get_info(self):
         return get_object(self.mediainfo, selector='track.1.Height')
 
     def merge(self):
         global args
+        cmd = [
+            "mkvmerge",
+            "--output {0}/{1}".format(args.target, self.output),
+            "--title \"{0}\"".format(self.parsed["movie_name"].replace('.', ' '))
+        ]
+        if self.tags:
+            cmd.append("--global-tags {0}".format(self.tags))
+        if self.check_chapter():
+            cmd.append("--chapters {0}".format(self.chapters_file))
+
+        cmd.append(self.filename)
         proc = subprocess.run(
-            ["mkvmerge --output {0}/{1} --title \"{2}\" --global-tags {3} {4}".format(
-                args.target,
-                self.output,
-                self.parsed["movie_name"].replace('.', ' '),
-                self.tags,
-                self.filename
-            )],
+            [" ".join(cmd)],
             shell=True)
         if proc.returncode > 0:
             print("\x1b[0;30;41m Error \x1b[0m")
             raise MkvPropEditError('mkvmerge file error on {0}'.format(self.filename))
 
     def set_chapter(self):
-        if os.path.exists(self.chapters.format(self.name)):
-            chapter_file = self.chapters.format(self.name)
-        elif self.parsed and os.path.exists(self.chapters.format(
-                "{0}.{1}".format(self.parsed.get("movie_name"), self.parsed.get("year_of_release"))
-        )):
-            chapter_file = self.chapters.format(
-                "{0}.{1}".format(self.parsed.get("movie_name"), self.parsed.get("year_of_release"))
-            )
-        else:
-            return None
-        set_chapter(self.filename, chapter_file)
+        if self.check_chapter():
+            set_chapter(self.filename, self.chapters_file)
+        return None
 
     def set_tag(self):
         if self.tags and os.path.exists(self.tags):
@@ -154,7 +162,7 @@ def set_chapter(filename, chapter_file):
         stdout=subprocess.PIPE,
         shell=True)
     (out, err) = proc.communicate()
-    if err:
+    if proc.returncode > 0:
         print("update chapter ... \x1b[0;30;41m Error \x1b[0m")
         print(err)
         raise MkvPropEditError('mkvpropedit set chapters error on {0}'.format(filename))
@@ -168,7 +176,7 @@ def set_tag(filename, tag_xml_file):
         stdout=subprocess.PIPE,
         shell=True)
     (out, err) = proc.communicate()
-    if err:
+    if proc.returncode > 0:
         print("update tag ... \x1b[0;30;41m Error \x1b[0m")
         print(err)
         raise MkvPropEditError('mkvpropedit set tags error on {0}'.format(filename))
@@ -182,7 +190,7 @@ def set_title(filename, title, **kwargs):
         stdout=subprocess.PIPE,
         shell=True)
     (out, err) = proc.communicate()
-    if err:
+    if proc.returncode > 0:
         print("update title ... \x1b[0;30;41m Error \x1b[0m")
         print(err)
         raise MkvPropEditError('mkvpropedit set title error on {0}'.format(filename))
@@ -229,7 +237,6 @@ if __name__ == "__main__":
             print("Work: {0}".format(args.file))
             movie = MovieInfo(args.file)
             movie.to_xml()
-            movie.set_chapter()
             movie.merge()
         print("\x1b[6;30;42m Success! \x1b[0m")
     except Exception as e:
