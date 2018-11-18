@@ -14,18 +14,35 @@ class MovieInfo:
         self.name = os.path.splitext(filename)[0]
         self.chapters = "{0}.chapters.txt"
         self.chapters_file = None
+        self.cmd = None
         self.filename = filename
-        matchs = re.match(
-            "(?P<movie_name>.+)\.(?P<year_of_release>\d{4})(\.(?P<original_source_medium>[^-]+))?(-(?P<encoder>.+))?\.\w{3}$",
-            os.path.basename(filename)
-        )
+        self.mediainfo = media_info(filename)
+        if self.get_title():
+            matchs = re.match(
+                "(?P<movie_name>.+)\.(?P<year_of_release>\d{4})(\.(?P<original_source_medium>[^-]+))?(-(?P<encoder>.+))?$",
+                str(self.get_title())
+            )
+        elif self.get_movie():
+            matchs = re.match(
+                "(?P<movie_name>.+)\.(?P<year_of_release>\d{4})(\.(?P<original_source_medium>[^-]+))?(-(?P<encoder>.+))?$",
+                str(self.get_movie())
+            )
+        elif self.get_movie_name():
+            matchs = re.match(
+                "(?P<movie_name>.+)\.(?P<year_of_release>\d{4})(\.(?P<original_source_medium>[^-]+))?(-(?P<encoder>.+))?$",
+                str(self.get_movie_name())
+            )
+        else:
+            matchs = re.match(
+                "(?P<movie_name>.+)\.(?P<year_of_release>\d{4})(\.(?P<original_source_medium>[^-]+))?(-(?P<encoder>.+))?\.\w{3}$",
+                str(os.path.basename(filename))
+            )
         self.parsed = matchs.groupdict() if matchs else None
         self.output = None
         if self.parsed:
             self.output = "{0}.{1}.mkv".format(self.parsed.get("movie_name"), self.parsed.get("year_of_release"))
         else:
             self.output = "{0}.mkv".format(self.name)
-        self.mediainfo = media_info(filename)
         self.tags = None
 
     def check_chapter(self):
@@ -39,24 +56,54 @@ class MovieInfo:
             )
         return self.chapters_file
 
-    def get_info(self):
+    def get_cmd(self):
+        if self.mediainfo:
+            global lang
+            track_list = get_object(self.mediainfo, 'track')[1:]
+            for track in track_list:
+                if track['@type'] == 'Video':
+                    self.cmd.append("--compression {0}:none".format(track['ID']))
+                    self.cmd.append("--track-name {0}:".format(track['ID']))
+                elif track['@type'] == 'Audio':
+                    self.cmd.append("--compression {0}:none".format(track['ID']))
+                    self.cmd.append("--track-name {0}:".format(track['ID']))
+                elif track['@type'] == 'Text':
+                    self.cmd.append("--compression {0}:none".format(track['ID']))
+                    if 'force' in str(track['Title']).lower():
+                        self.cmd.append("--track-name {0}:'Forced'".format(track['ID']))
+                        self.cmd.append("--forced-track {0}:yes".format(track['ID']))
+                    else:
+                        self.cmd.append("--track-name {0}:".format(track['ID']))
+        return None
+
+    def get_height(self):
         return get_object(self.mediainfo, selector='track.1.Height')
+
+    def get_movie(self):
+        return get_object(self.mediainfo, selector='track.0.Movie')
+
+    def get_movie_name(self):
+        return get_object(self.mediainfo, selector='track.0.Movie_name')
+
+    def get_title(self):
+        return get_object(self.mediainfo, selector='track.0.Title')
 
     def merge(self):
         global args
-        cmd = [
+        self.cmd = [
             "mkvmerge",
             "--output {0}/{1}".format(args.target, self.output),
             "--title \"{0}\"".format(self.parsed["movie_name"].replace('.', ' '))
         ]
+        self.get_cmd()
         if self.tags:
-            cmd.append("--global-tags {0}".format(self.tags))
+            self.cmd.append("--global-tags {0}".format(self.tags))
         if self.check_chapter():
-            cmd.append("--chapters {0}".format(self.chapters_file))
+            self.cmd.append("--chapters {0}".format(self.chapters_file))
 
-        cmd.append(self.filename)
+        self.cmd.append(self.filename)
         proc = subprocess.run(
-            [" ".join(cmd)],
+            [" ".join(self.cmd)],
             shell=True)
         if proc.returncode > 0:
             print("\x1b[0;30;41m Error \x1b[0m")
@@ -73,10 +120,17 @@ class MovieInfo:
 
     def set_title(self):
         if self.parsed:
+            new = self.parsed.get("movie_name").replace('.', ' ')
             set_title(
                 self.filename,
-                title=self.parsed.get("movie_name").replace('.', ' ')
+                title=new
             )
+            self.update_mediainfo()
+            if self.get_movie() == new:
+                print("update title ... \33[32m Ok \33[0m")
+            else:
+                print("update title ... \x1b[0;30;41m Error \x1b[0m")
+            print("--> new title: \"{0}\"".format(new))
 
     def to_xml(self):
         header = '<?xml version="1.0" encoding="ISO-8859-1"?><!DOCTYPE Tags SYSTEM "matroskatags.dtd">'
@@ -88,6 +142,9 @@ class MovieInfo:
         with open(self.tags, mode='w') as f:
             f.write(header)
             f.write(ET.tostring(tags, encoding='utf-8', method='xml').decode('utf-8'))
+
+    def update_mediainfo(self):
+        self.mediainfo = media_info(self.filename)
 
 
 class MediaInfoError(BaseException):
@@ -135,13 +192,14 @@ def create_simple(key, val):
     name.text = str(key).replace('_', ' ').capitalize()
     if str(key).lower() == 'original_source_medium':
         global trans
-        if trans.get(str(val).lower()):
-            value = ET.Element('String')
-            value.text = str(trans[str(val).lower()])
-            simple.append(name)
-            simple.append(value)
-        else:
-            return None
+        for el in trans.keys():
+            if el in str(val).lower():
+                value = ET.Element('String')
+                value.text = str(trans[el])
+                simple.append(name)
+                simple.append(value)
+                return simple
+        return None
     elif str(key).lower() == 'movie_name':
         value = ET.Element('String')
         value.text = str(val).replace('.', ' ')
@@ -194,16 +252,16 @@ def set_title(filename, title, **kwargs):
         print("update title ... \x1b[0;30;41m Error \x1b[0m")
         print(err)
         raise MkvPropEditError('mkvpropedit set title error on {0}'.format(filename))
-    print("update title ... \33[32m Ok \33[0m")
+    # print("update title ... \33[32m Ok \33[0m")
 
 
 if __name__ == "__main__":
     arg_parser = argparse.ArgumentParser()
-    arg_parser.add_argument('--mode',
+    arg_parser.add_argument('mode',
                             # nargs=1,
                             default='update',
                             type=str,
-                            required=True,
+                            # required=True,
                             choices=['merge', 'update'],
                             help='mode [merge|update]. Default=merge')
     arg_parser.add_argument('--file',
@@ -218,6 +276,10 @@ if __name__ == "__main__":
                             help='repository to store new generated file in mode "merge".'
                                  ' default=/tmp')
     args = arg_parser.parse_args()
+    lang = {
+        'en': 'eng',
+        'fr': 'fre'
+    }
     trans = {
         'Blu-ray': ['720p', '1080p', 'bluray'],
         'WebDL': ['webdl', 'web-dl'],
