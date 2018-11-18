@@ -16,7 +16,7 @@ class MovieInfo:
         self.chapters_file = None
         self.filename = filename
         matchs = re.match(
-            "(?P<movie_name>.+)\.(?P<year_of_release>\d{4})(\.(?P<original_source_medium>\w+))?(-(?P<encoder>.+))?\.\w{3}$",
+            "(?P<movie_name>.+)\.(?P<year_of_release>\d{4})(\.(?P<original_source_medium>[^-]+))?(-(?P<encoder>.+))?\.\w{3}$",
             os.path.basename(filename)
         )
         self.parsed = matchs.groupdict() if matchs else None
@@ -219,12 +219,11 @@ if __name__ == "__main__":
                                  ' default=/tmp')
     args = arg_parser.parse_args()
     trans = {
-        '720p': 'Blu-ray',
-        '1080p': 'Blu-ray',
-        'bluray': 'Blu-ray',
-        'webdl': 'WebDL',
-        'dvd': 'DVD-Video'
+        'Blu-ray': ['720p','1080p','bluray'],
+        'WebDL': ['webdl','web-dl'],
+        'DVD-Video': ['dvd']
     }
+    trans = {e:k for k:v in trans.items() for e in v}
     try:
         if args.mode == 'update':
             print("Work: {0}".format(args.file))
