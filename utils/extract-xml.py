@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import argparse
+import json
 import os
 import re
 import subprocess
@@ -105,8 +106,16 @@ class MovieInfo:
         proc = subprocess.run(
             [" ".join(self.cmd)],
             shell=True)
+        if os.path.exists("{0}/{1}".format(args.target, self.output)):
+            new_file = media_info("{0}/{1}".format(args.target, self.output))
+            print(json.dumps(
+                get_object(new_file, selector='track.0'),
+                indent=2
+            ))
         if proc.returncode > 0:
             print("\x1b[0;30;41m Error \x1b[0m")
+            print(proc.returncode)
+            print(proc.stderr)
             raise MkvPropEditError('mkvmerge file error on {0}'.format(self.filename))
 
     def set_chapter(self):
