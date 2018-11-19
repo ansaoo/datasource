@@ -94,7 +94,7 @@ class MovieInfo:
 
     def merge(self):
         global args
-        output_name = "{0}/{1}/{2}".format(args.target, str(self.output).lower(), self.output)
+        output_name = "{0}/{1}/{2}".format(args.target, str(self.output[0]).lower(), self.output)
         self.cmd = [
             "mkvmerge",
             "--output {0}".format(output_name),
