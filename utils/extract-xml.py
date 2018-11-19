@@ -104,7 +104,6 @@ class MovieInfo:
 
         self.cmd.append(self.filename)
         if os.path.exists("{0}/{1}".format(args.target, self.output)):
-            print("\x1b[6;30;43m Abort \x1b[0m")
             raise FileExistsError("{0}/{1}".format(args.target, self.output))
         proc = subprocess.run(
             [" ".join(self.cmd)],
@@ -312,6 +311,9 @@ if __name__ == "__main__":
             movie.to_xml()
             movie.merge()
         print("\x1b[6;30;42m Success! \x1b[0m")
+    except FileExistsError as e:
+        print("{0} already exist".format(e.__str__()))
+        print("\x1b[6;30;43m Abort \x1b[0m")
     except Exception as e:
         print("\x1b[0;30;41m Failed \x1b[0m")
         print(e.__str__())
