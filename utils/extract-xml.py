@@ -103,6 +103,9 @@ class MovieInfo:
             self.cmd.append("--chapters {0}".format(self.chapters_file))
 
         self.cmd.append(self.filename)
+        if os.path.exists("{0}/{1}".format(args.target, self.output)):
+            print("\x1b[6;30;43m Abort \x1b[0m")
+            raise FileExistsError("{0}/{1}".format(args.target, self.output))
         proc = subprocess.run(
             [" ".join(self.cmd)],
             shell=True)
