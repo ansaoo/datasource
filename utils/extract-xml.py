@@ -73,7 +73,7 @@ class MovieInfo:
                     self.cmd.append("--track-name {0}:".format(track['ID']))
                 elif track['@type'] == 'Text':
                     self.cmd.append("--compression {0}:none".format(track['ID']))
-                    if 'force' in str(track['Title']).lower():
+                    if 'force' in str(track.get('Title')).lower():
                         self.cmd.append("--track-name {0}:'Forced'".format(track['ID']))
                         self.cmd.append("--forced-track {0}:yes".format(track['ID']))
                     else:
