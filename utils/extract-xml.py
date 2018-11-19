@@ -105,12 +105,12 @@ class MovieInfo:
 
         self.cmd.append(self.filename)
         if os.path.exists(output_name):
-            raise FileExistsError("{0}/{1}".format(args.target, self.output))
+            raise FileExistsError(output_name)
         proc = subprocess.run(
             [" ".join(self.cmd)],
             shell=True)
         if os.path.exists(output_name):
-            new_file = media_info("{0}/{1}".format(args.target, self.output))
+            new_file = media_info(output_name)
             print(json.dumps(
                 get_object(new_file, selector='track.0'),
                 indent=2
