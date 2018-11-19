@@ -102,9 +102,9 @@ class MovieInfo:
         ]
         self.get_cmd()
         if self.tags:
-            self.cmd.append("--global-tags {0}".format(self.tags))
+            self.cmd.append("--global-tags \"{0}\"".format(self.tags))
         if self.check_chapter():
-            self.cmd.append("--chapters {0}".format(self.chapters_file))
+            self.cmd.append("--chapters \"{0}\"".format(self.chapters_file))
 
         self.cmd.append(self.filename)
         if os.path.exists(output_name):
@@ -172,7 +172,7 @@ class MkvPropEditError(Exception):
 
 def media_info(filename):
     proc = subprocess.Popen(
-        ["mediainfo --Output=XML {0}".format(filename)],
+        ["mediainfo --Output=XML \"{0}\"".format(filename)],
         stdout=subprocess.PIPE,
         shell=True)
     (out, err) = proc.communicate()
