@@ -70,7 +70,10 @@ class MovieInfo:
                     self.cmd.append("--track-name {0}:".format(int(track['ID'])-1))
                 elif track['@type'] == 'Audio':
                     self.cmd.append("--compression {0}:none".format(int(track['ID'])-1))
-                    self.cmd.append("--track-name {0}:".format(int(track['ID'])-1))
+                    if 'commenta' in str(track.get('Title')).lower():
+                        self.cmd.append("--track-name {0}:'Commentary'".format(int(track['ID'])-1))
+                    else:
+                        self.cmd.append("--track-name {0}:".format(int(track['ID'])-1))
                 elif track['@type'] == 'Text':
                     self.cmd.append("--compression {0}:none".format(int(track['ID'])-1))
                     if 'force' in str(track.get('Title')).lower():
