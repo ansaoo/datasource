@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="2b724821-8bc3-4ad8-b419-414f06da529d" name="Default" comment="Update:&#10; - add check exist chapter file&#10; - fix detect error code with mkvpropedit">
+    <list default="true" id="2b724821-8bc3-4ad8-b419-414f06da529d" name="Default" comment="Update:&#10; - add pretty print general info after merge file">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/utils/extract-xml.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/extract-xml.py" afterDir="false" />
     </list>
@@ -97,16 +97,16 @@
           <entry key="gitignore" value="9" />
           <entry key="html" value="1273" />
           <entry key="md" value="443" />
-          <entry key="py" value="4757" />
-          <entry key="txt" value="535" />
+          <entry key="py" value="4904" />
+          <entry key="txt" value="663" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
           <entry key="HTML" value="1273" />
           <entry key="Markdown" value="443" />
-          <entry key="PLAIN_TEXT" value="544" />
-          <entry key="Python" value="4757" />
+          <entry key="PLAIN_TEXT" value="672" />
+          <entry key="Python" value="4904" />
         </counts>
       </usages-collector>
     </session>
@@ -116,13 +116,13 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/utils/extract-xml.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="238">
-              <caret line="110" column="29" lean-forward="true" selection-start-line="110" selection-start-column="29" selection-end-line="110" selection-end-column="29" />
+            <state relative-caret-position="227">
+              <caret line="163" lean-forward="true" selection-start-line="163" selection-end-line="163" />
               <folding>
                 <element signature="e#24#39#0" expanded="true" />
-                <marker date="1542623010868" expanded="true" signature="2292:3357" ph="..." />
-                <marker date="1542623010868" expanded="true" signature="3671:3745" ph="..." />
-                <marker date="1542623010868" expanded="true" signature="7967:7970" ph="..." />
+                <marker date="1542624347939" expanded="true" signature="2292:3357" ph="..." />
+                <marker date="1542624347939" expanded="true" signature="3671:3745" ph="..." />
+                <marker date="1542624347939" expanded="true" signature="8094:8097" ph="..." />
               </folding>
             </state>
           </provider>
@@ -245,7 +245,7 @@
     <property name="DefaultHtmlFileTemplate" value="HTML File" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="aspect.path.notification.shown" value="true" />
-    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1542580060533" />
+    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1542624371706" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$/../inspinia" />
     <property name="nodejs_interpreter_path" value="node" />
   </component>
@@ -499,7 +499,7 @@
       <workItem from="1542457976029" duration="647000" />
       <workItem from="1542483574077" duration="597000" />
       <workItem from="1542541967810" duration="13251000" />
-      <workItem from="1542614198732" duration="1620000" />
+      <workItem from="1542614198732" duration="2955000" />
     </task>
     <task id="LOCAL-00001" summary="Update">
       <created>1524233472558</created>
@@ -739,11 +739,32 @@
       <option name="project" value="LOCAL" />
       <updated>1542575652026</updated>
     </task>
-    <option name="localTasksCounter" value="35" />
+    <task id="LOCAL-00035" summary="Update:&#10; - add pretty print general info after merge file">
+      <created>1542623084003</created>
+      <option name="number" value="00035" />
+      <option name="presentableId" value="LOCAL-00035" />
+      <option name="project" value="LOCAL" />
+      <updated>1542623084003</updated>
+    </task>
+    <task id="LOCAL-00036" summary="Update:&#10; - add file already exist check before merge">
+      <created>1542623636769</created>
+      <option name="number" value="00036" />
+      <option name="presentableId" value="LOCAL-00036" />
+      <option name="project" value="LOCAL" />
+      <updated>1542623636769</updated>
+    </task>
+    <task id="LOCAL-00037" summary="Update:&#10; - add except block for file exist error">
+      <created>1542623811552</created>
+      <option name="number" value="00037" />
+      <option name="presentableId" value="LOCAL-00037" />
+      <option name="project" value="LOCAL" />
+      <updated>1542623811552</updated>
+    </task>
+    <option name="localTasksCounter" value="38" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="275243000" />
+    <option name="totallyTimeSpent" value="276578000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="25" width="1320" height="763" extended-state="0" />
@@ -805,7 +826,10 @@
     <MESSAGE value="Update:&#10; - add check exist chapter file&#10; - fix detect error code with mkvpropedit" />
     <MESSAGE value="Fix dict comprehension" />
     <MESSAGE value="Update:&#10; - check after set new title&#10; - add any compression in mkvmerge cmd&#10; - remove any title track in mkvmerge cmd except forced subtitle" />
-    <option name="LAST_COMMIT_MESSAGE" value="Update:&#10; - check after set new title&#10; - add any compression in mkvmerge cmd&#10; - remove any title track in mkvmerge cmd except forced subtitle" />
+    <MESSAGE value="Update:&#10; - add pretty print general info after merge file" />
+    <MESSAGE value="Update:&#10; - add file already exist check before merge" />
+    <MESSAGE value="Update:&#10; - add except block for file exist error" />
+    <option name="LAST_COMMIT_MESSAGE" value="Update:&#10; - add except block for file exist error" />
   </component>
   <component name="antWorkspaceConfiguration">
     <option name="IS_AUTOSCROLL_TO_SOURCE" value="false" />
@@ -901,13 +925,13 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/utils/extract-xml.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="238">
-          <caret line="110" column="29" lean-forward="true" selection-start-line="110" selection-start-column="29" selection-end-line="110" selection-end-column="29" />
+        <state relative-caret-position="227">
+          <caret line="163" lean-forward="true" selection-start-line="163" selection-end-line="163" />
           <folding>
             <element signature="e#24#39#0" expanded="true" />
-            <marker date="1542623010868" expanded="true" signature="2292:3357" ph="..." />
-            <marker date="1542623010868" expanded="true" signature="3671:3745" ph="..." />
-            <marker date="1542623010868" expanded="true" signature="7967:7970" ph="..." />
+            <marker date="1542624347939" expanded="true" signature="2292:3357" ph="..." />
+            <marker date="1542624347939" expanded="true" signature="3671:3745" ph="..." />
+            <marker date="1542624347939" expanded="true" signature="8094:8097" ph="..." />
           </folding>
         </state>
       </provider>

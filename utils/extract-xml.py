@@ -91,9 +91,10 @@ class MovieInfo:
 
     def merge(self):
         global args
+        output_name = "{0}/{1}".format(args.target, self.output)
         self.cmd = [
             "mkvmerge",
-            "--output {0}/{1}".format(args.target, self.output),
+            "--output {0}".format(output_name),
             "--title \"{0}\"".format(self.parsed["movie_name"].replace('.', ' '))
         ]
         self.get_cmd()
@@ -103,12 +104,12 @@ class MovieInfo:
             self.cmd.append("--chapters {0}".format(self.chapters_file))
 
         self.cmd.append(self.filename)
-        if os.path.exists("{0}/{1}".format(args.target, self.output)):
+        if os.path.exists(output_name):
             raise FileExistsError("{0}/{1}".format(args.target, self.output))
         proc = subprocess.run(
             [" ".join(self.cmd)],
             shell=True)
-        if os.path.exists("{0}/{1}".format(args.target, self.output)):
+        if os.path.exists(output_name):
             new_file = media_info("{0}/{1}".format(args.target, self.output))
             print(json.dumps(
                 get_object(new_file, selector='track.0'),
@@ -158,11 +159,11 @@ class MovieInfo:
         self.mediainfo = media_info(self.filename)
 
 
-class MediaInfoError(BaseException):
+class MediaInfoError(Exception):
     pass
 
 
-class MkvPropEditError(BaseException):
+class MkvPropEditError(Exception):
     pass
 
 
