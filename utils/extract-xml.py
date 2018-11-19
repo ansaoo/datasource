@@ -5,6 +5,8 @@ import json
 import os
 import re
 import subprocess
+import sys
+import traceback
 import xmltodict
 import xml.etree.ElementTree as ET
 from functools import reduce
@@ -91,7 +93,7 @@ class MovieInfo:
 
     def merge(self):
         global args
-        output_name = "{0}/{1}".format(args.target, self.output)
+        output_name = "{0}/{1}/{2}".format(args.target, str(self.output).lower(), self.output)
         self.cmd = [
             "mkvmerge",
             "--output {0}".format(output_name),
@@ -317,5 +319,6 @@ if __name__ == "__main__":
         print("\x1b[6;30;43m Abort \x1b[0m")
     except Exception as e:
         print("\x1b[0;30;41m Failed \x1b[0m")
+        traceback.print_exc(file=sys.stdout)
         print(e.__str__())
 
