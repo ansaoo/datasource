@@ -66,18 +66,18 @@ class MovieInfo:
             track_list = get_object(self.mediainfo, 'track')[1:]
             for track in track_list:
                 if track['@type'] == 'Video':
-                    self.cmd.append("--compression {0}:none".format(track['ID']))
-                    self.cmd.append("--track-name {0}:".format(track['ID']))
+                    self.cmd.append("--compression {0}:none".format(int(track['ID'])-1))
+                    self.cmd.append("--track-name {0}:".format(int(track['ID'])-1))
                 elif track['@type'] == 'Audio':
-                    self.cmd.append("--compression {0}:none".format(track['ID']))
-                    self.cmd.append("--track-name {0}:".format(track['ID']))
+                    self.cmd.append("--compression {0}:none".format(int(track['ID'])-1))
+                    self.cmd.append("--track-name {0}:".format(int(track['ID'])-1))
                 elif track['@type'] == 'Text':
-                    self.cmd.append("--compression {0}:none".format(track['ID']))
+                    self.cmd.append("--compression {0}:none".format(int(track['ID'])-1))
                     if 'force' in str(track.get('Title')).lower():
-                        self.cmd.append("--track-name {0}:'Forced'".format(track['ID']))
-                        self.cmd.append("--forced-track {0}:yes".format(track['ID']))
+                        self.cmd.append("--track-name {0}:'Forced'".format(int(track['ID'])-1))
+                        self.cmd.append("--forced-track {0}:yes".format(int(track['ID'])-1))
                     else:
-                        self.cmd.append("--track-name {0}:".format(track['ID']))
+                        self.cmd.append("--track-name {0}:".format(int(track['ID'])-1))
         return None
 
     def get_height(self):
