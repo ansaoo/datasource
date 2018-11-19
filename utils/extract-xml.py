@@ -20,27 +20,28 @@ class MovieInfo:
         self.cmd = None
         self.filename = filename
         self.mediainfo = media_info(filename)
-        if self.get_title():
-            matchs = re.match(
+        matches = None
+        if matches is None and self.get_title():
+            matches = re.match(
                 "(?P<movie_name>.+)\.(?P<year_of_release>\d{4})(\.(?P<original_source_medium>[^-]+))?(-(?P<encoder>.+))?$",
                 str(self.get_title())
             )
-        elif self.get_movie():
-            matchs = re.match(
+        if matches is None and self.get_movie():
+            matches = re.match(
                 "(?P<movie_name>.+)\.(?P<year_of_release>\d{4})(\.(?P<original_source_medium>[^-]+))?(-(?P<encoder>.+))?$",
                 str(self.get_movie())
             )
-        elif self.get_movie_name():
-            matchs = re.match(
+        if matches is None and self.get_movie_name():
+            matches = re.match(
                 "(?P<movie_name>.+)\.(?P<year_of_release>\d{4})(\.(?P<original_source_medium>[^-]+))?(-(?P<encoder>.+))?$",
                 str(self.get_movie_name())
             )
-        else:
-            matchs = re.match(
+        if matches is None:
+            matches = re.match(
                 "(?P<movie_name>.+)\.(?P<year_of_release>\d{4})(\.(?P<original_source_medium>[^-]+))?(-(?P<encoder>.+))?\.\w{3}$",
                 str(os.path.basename(filename))
             )
-        self.parsed = matchs.groupdict() if matchs else None
+        self.parsed = matches.groupdict() if matches else None
         self.output = None
         if self.parsed:
             self.output = "{0}.{1}.mkv".format(self.parsed.get("movie_name"), self.parsed.get("year_of_release"))
