@@ -1,5 +1,5 @@
 elasticsearch==6.2.0
-PyYAML==4.2b1
+PyYAML==5.4
 requests==2.20.0
 urllib3==1.23
 xmljson==0.1.9
